@@ -1,14 +1,5 @@
 [
   {
-    "id": "1",
-    "title": "First item",
-    "category": "alpha",
-    "tags": [
-      "a",
-      "b"
-    ]
-  },
-  {
     "id": "2",
     "title": "Second item",
     "category": "beta",
