@@ -11,3 +11,8 @@ class ItemCreate(BaseModel):
     title: str
     category: str
     tags: List[str] = []
+
+class ItemUpdate(BaseModel):
+    title : str
+    category:str
+    tags: List[str] = []
