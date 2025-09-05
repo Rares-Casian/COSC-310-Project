@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "title": "First item",
+    "category": "alpha",
+    "tags": [
+      "a",
+      "b"
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Second item",
+    "category": "beta",
+    "tags": [
+      "b",
+      "c"
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Third item",
+    "category": "alpha",
+    "tags": [
+      "c"
+    ]
+  },
+  {
+    "id": "0e411d79-a25a-4418-9138-ad297f2a0cca",
+    "title": "Soccer Ballssss",
+    "category": "sports",
+    "tags": [
+      "soccer",
+      "equipment"
+    ]
+  },
+  {
+    "id": "6b05f8a3-e788-440c-b191-2d43d0c6c695",
+    "title": "Soccer Ballssss",
+    "category": "sports",
+    "tags": [
+      "soccer",
+      "equipment"
+    ]
+  }
+]
