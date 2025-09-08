@@ -18,8 +18,6 @@ def create_item(payload: ItemCreate) -> Item:
     save_all(items)
     return new_item
 
-from fastapi import HTTPException
-
 def get_item_by_id(item_id: str) -> Item:
     items = load_all()
     for it in items:
