@@ -7,4 +7,8 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
+@app.get("")
+def get_item(name : str):
+    return {"item ": name, "status": "ok"}
+
 app.include_router(items_router)
