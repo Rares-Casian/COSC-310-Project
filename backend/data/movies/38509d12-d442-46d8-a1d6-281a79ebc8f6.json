@@ -1,0 +1,26 @@
+{
+    "movie_id": "38509d12-d442-46d8-a1d6-281a79ebc8f6",
+    "title": "Morbius",
+    "imdb_rating": 5.2,
+    "meta_score": 35,
+    "genres": [
+        "Action",
+        "Adventure",
+        "Horror"
+    ],
+    "directors": [
+        "Daniel Espinosa"
+    ],
+    "release_date": "2022-04-01",
+    "duration": 104,
+    "description": "Biochemist Michael Morbius tries to cure himself of a rare blood disease, but he inadvertently infects himself with a form of vampirism instead.",
+    "main_stars": [
+        "Jared Leto",
+        "Matt Smith",
+        "Adria Arjona"
+    ],
+    "total_user_reviews": null,
+    "total_critic_reviews": 230,
+    "total_rating_count": 90706,
+    "source_folder": "Morbius"
+}
