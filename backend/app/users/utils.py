@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from backend.users import schemas
 from backend.authentication import security
 
-# 📁 File paths
+# File paths
 BASE_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "users")
 ACTIVE_FILE = os.path.join(BASE_DIR, "users_active.json")
 INACTIVE_FILE = os.path.join(BASE_DIR, "users_inactive.json")
@@ -18,7 +18,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # =========================
-# 🔹 Helper functions
+# Helper functions
 # =========================
 
 def _load_json(path):

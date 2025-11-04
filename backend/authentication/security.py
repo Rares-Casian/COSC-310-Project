@@ -15,7 +15,7 @@ security_scheme = HTTPBearer()
 ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Tokens expire after 60 minutes
 
 # Secret Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")  # 🗝️ Get from env or use fallback
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")  # Get from env or use fallback
 ALGORITHM = "HS256"  # JWT signing algorithm
 
 # Password Hashing Context
@@ -27,7 +27,7 @@ def hash_password(password: str) -> str:
 
 # Password Verification
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)  # ✅ Check if password matches hash
+    return pwd_context.verify(plain_password, hashed_password)  # Check if password matches hash
 
 # Access Token Creation
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -37,7 +37,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     to_encode.update({ 
         "exp": expire,  # Add expiration timestamp
     })
-    # 🔏 Encode JWT with secret key
+    # Encode JWT with secret key
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 # Token Verification
