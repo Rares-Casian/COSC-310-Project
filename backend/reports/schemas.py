@@ -56,3 +56,11 @@ class Report(ReportBase):
     moderator_id: Optional[str] = Field(None, description="Admin/moderator who reviewed the report.")
     moderator_notes: Optional[str] = None
 
+
+# --- SUMMARY SCHEMA (optional dashboard endpoint) ---
+class ReportSummary(BaseModel):
+    total_reports: int
+    pending: int
+    under_review: int
+    resolved: int
+    dismissed: int
