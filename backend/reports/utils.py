@@ -59,3 +59,27 @@ def create_report(reporter_id: str, reported_id: str, type: schemas.ReportType, 
     reports.append(new_report.dict())
     _save_json(reports)
     return new_report
+
+def update_report_status(report_id: str, update: schemas.ReportUpdate, moderator_id: str) -> Optional[schemas.Report]:
+    """Update the status and moderator info for a report."""
+    reports = _load_json()
+    for report in reports:
+        if report["report_id"] == report_id:
+            report["status"] = update.status
+            report["moderator_id"] = moderator_id
+            report["moderator_notes"] = update.moderator_notes
+            if update.status in [schemas.ReportStatus.resolved, schemas.ReportStatus.dismissed]:
+                report["resolved_at"] = datetime.utcnow().isoformat()
+            _save_json(reports)
+            return schemas.Report(**report)
+    return None
+
+
+def delete_report(report_id: str) -> bool:
+    """Delete a report by ID."""
+    reports = _load_json()
+    updated = [r for r in reports if r["report_id"] != report_id]
+    if len(updated) == len(reports):
+        return False
+    _save_json(updated)
+    return True
