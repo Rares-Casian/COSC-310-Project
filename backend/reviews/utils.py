@@ -53,3 +53,31 @@ def user_already_reviewed(movie_id: str, user_id: str) -> bool:
         if user["user_id"] == user_id:
             return movie_id in user.get("movies_reviewed", [])
     return False
+# Retrieve a review base on its review_id
+def get_review(movie_id: str, review_id: str) -> Optional[Dict]:
+    reviews = load_reviews(movie_id)
+    for r in reviews:
+        if r["review_id"] == review_id:
+            return r
+    return None
+
+# Update a review base on its review_id
+def update_review(movie_id: str, review_id: str, updates: schemas.ReviewUpdate) -> Optional[Dict]:
+    reviews = load_reviews(movie_id)
+    for review in reviews:
+        if review["review_id"] == review_id:
+            for key, value in updates.dict(exclude_unset=True).items():
+                review[key] = value
+            review["date"] = datetime.utcnow().date().isoformat()
+            save_reviews(movie_id, reviews)
+            return review
+    return None
+
+# Delete a review base on its review_id
+def delete_review(movie_id: str, review_id: str) -> bool:
+    reviews = load_reviews(movie_id)
+    updated = [r for r in reviews if r["review_id"] != review_id]
+    if len(updated) == len(reviews):
+        return False
+    save_reviews(movie_id, updated)
+    return True
