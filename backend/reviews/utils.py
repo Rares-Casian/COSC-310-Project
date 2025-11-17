@@ -81,3 +81,42 @@ def delete_review(movie_id: str, review_id: str) -> bool:
         return False
     save_reviews(movie_id, updated)
     return True
+#Load the movie review and then loop through the list to get the matching review id 
+# Then update the usefulness and helpful for that review
+def add_vote(movie_id: str, review_id: str, vote: schemas.Vote) -> Optional[Dict]:
+    reviews = load_reviews(movie_id)
+    for review in reviews:
+        if review["review_id"] == review_id:
+            review["usefulness"]["total_votes"] += 1
+            if vote.vote:
+                review["usefulness"]["helpful"] += 1
+            save_reviews(movie_id, reviews)
+            return review
+    return None
+
+#Filter review by rating and then sort by date,rating,helpful or total votes
+def filter_sort_reviews(
+    movie_id: str,
+    rating: Optional[int] = None,
+    sort_by: str = "date",
+    order: str = "desc",
+    skip: int = 0,
+    limit: int = 20,
+) -> List[Dict]:
+    """Filter, sort, and paginate reviews for a given movie."""
+    reviews = load_reviews(movie_id)
+
+    # Filter by rating
+    if rating is not None:
+        reviews = [r for r in reviews if r.get("rating") == rating]
+
+    # Sorting
+    reverse = order.lower() == "desc"
+    if sort_by in {"date", "rating"}:
+        reviews.sort(key=lambda r: r.get(sort_by), reverse=reverse)
+    elif sort_by == "helpful":
+        reviews.sort(key=lambda r: r["usefulness"]["helpful"], reverse=reverse)
+    elif sort_by == "total_votes":
+        reviews.sort(key=lambda r: r["usefulness"]["total_votes"], reverse=reverse)
+
+    return reviews[skip: skip + limit]
