@@ -1,5 +1,5 @@
-# 🎬 Movies Router — Handles all movie browsing and watch-later features.
-# 🔧 Updated for cleaner admin logic, improved type consistency, and better file handling.
+# Movies Router — Handles all movie browsing and watch-later features.
+
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -11,27 +11,6 @@ from backend.penalties import utils as penalty_utils
 
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
-@router.get("/download")
-def download_movies(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
-    """
-    Combine all individual movie JSONs into one downloadable file.
-    Automatically deletes the temporary export file after sending.
-    """
-    movies = utils.load_movies()
-    if not movies:
-        raise HTTPException(status_code=404, detail="No movies found.")
-
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-    with open(tmp_file.name, "w") as f:
-        json.dump(movies, f, indent=4)
-
-    background_tasks.add_task(os.remove, tmp_file.name)
-
-    return FileResponse(
-        tmp_file.name,
-        filename="movies.json",
-        media_type="application/json"
-    )
 
 
 # ---------------- Watch-Later Routes ----------------
@@ -67,7 +46,7 @@ def modify_watch_later(
     Restricted by penalties:
     - suspension
     """
-    # 🔒 Check for suspension
+    # Check for suspension
     restriction = penalty_utils.check_active_penalty(current_user.user_id, ["suspension"])
     if restriction:
         raise HTTPException(status_code=403, detail=restriction)
@@ -90,36 +69,3 @@ def modify_watch_later(
 
     utils.update_watch_later(target_id, update.movie_id, update.action)
     return {"message": f"Movie {update.action}ed to {('user '+target_id) if user_id else 'your'} watch-later list."}
-
-
-@router.get("/", response_model=List[schemas.Movie])
-def list_movies(
-    params: schemas.MovieSearchParams = Depends(),
-    current_user: schemas.UserToken = Depends(get_current_user)
-):
-    movies = utils.load_movies()
-    movies = utils.filter_movies(movies, params)
-    movies = utils.sort_movies(movies, params.sort_by, params.order)
-    movies = utils.paginate_movies(movies, params.page, params.limit)
-    return movies
-
-# ✅ /movies/search alias → same functionality as /movies/
-# Don't know if I even need this route
-@router.get("/search", response_model=List[schemas.Movie])
-def search_movies(
-    params: schemas.MovieSearchParams = Depends(),
-    current_user: schemas.UserToken = Depends(get_current_user)
-):
-    """Alias for /movies/ — same search, filter, and pagination logic."""
-    return list_movies(params=params, current_user=current_user)
-
-@router.get("/{movie_id}", response_model=schemas.Movie)
-def get_movie(movie_id: str, current_user: schemas.UserToken = Depends(get_current_user)):
-    movie = utils.get_movie(movie_id)
-    if not movie:
-        raise HTTPException(status_code=404, detail="Movie not found")
-    return movie
-
-
-# Suggestions
-# 
