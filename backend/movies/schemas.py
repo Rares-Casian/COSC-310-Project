@@ -19,7 +19,8 @@ class Movie(BaseModel):
     total_critic_reviews: Optional[int] = None
     total_rating_count: Optional[int] = None
     source_folder: Optional[str] = None
-
+    critic_score: Optional[float] = None
+    public_score: Optional[float] = None 
 
 class MovieSearchParams(BaseModel):
     query: Optional[str] = None
