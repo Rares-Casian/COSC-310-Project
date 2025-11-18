@@ -94,7 +94,8 @@ def modify_watch_later(
 @router.get("/search", response_model=List[schemas.Movie])
 def search_movies(
     params: schemas.MovieSearchParams = Depends(),
-    current_user: schemas.UserToken = Depends(get_current_user) #Requires a valid user token (`get_current_user`).
+       current_user: Optional[schemas.UserToken] = Depends(get_optional_user)  
+
 ):
     #Load all movie
     movies = utils.load_movies()
@@ -107,8 +108,10 @@ def search_movies(
     return movies
 #get movie base on movie_id
 @router.get("/{movie_id}", response_model=schemas.Movie)
-def get_movie(movie_id: str, current_user: schemas.UserToken = Depends(get_current_user)):
-    movie = utils.get_movie(movie_id)
+def get_movie(
+    movie_id: str, 
+    current_user: Optional[schemas.UserToken] = Depends(get_optional_user)
+):
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found")
     return movie
