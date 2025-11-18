@@ -70,3 +70,19 @@ def delete_penalty(
 
     utils._save_penalties(updated)
     return {"message": f"Penalty {penalty_id} deleted successfully."}
+
+# ────────────────────────────────
+# PATCH /penalties/{penalty_id}
+# ────────────────────────────────
+@router.patch("/{penalty_id}")
+def resolve_penalty(
+    penalty_id: str,
+    notes: Optional[str] = Query(None, description="Notes for resolution"),
+    current_user=Depends(get_current_user),
+):
+    """Resolve or lift a penalty (admin/mod only)."""
+    if current_user.role not in ["administrator", "moderator"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    utils.resolve_penalty(penalty_id, moderator_id=current_user.user_id, notes=notes)
+    return {"message": f"Penalty {penalty_id} resolved successfully."}
