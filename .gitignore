@@ -1,1 +1,29 @@
+# ---- Virtual Environments ----
 venv/
+venv*/
+*/venv/
+.venv/
+.venv*/
+*/.venv/
+
+# Generic virtual environment folders
+env/
+env*/
+*/env/
+
+# PyCharm or other IDE virtualenvs
+.idea/
+
+# ---- VS Code ----
+.vscode/
+*/.vscode/
+
+# ---- Python cache ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---- OS files ----
+.DS_Store
+Thumbs.db
