@@ -86,3 +86,24 @@ def resolve_penalty(
 
     utils.resolve_penalty(penalty_id, moderator_id=current_user.user_id, notes=notes)
     return {"message": f"Penalty {penalty_id} resolved successfully."}
+
+
+# ────────────────────────────────
+# DELETE /penalties/{penalty_id}
+# ────────────────────────────────
+@router.delete("/{penalty_id}")
+def delete_penalty(
+    penalty_id: str,
+    current_user=Depends(get_current_user),
+):
+    """Admins can permanently delete a penalty record."""
+    if current_user.role != "administrator":
+        raise HTTPException(status_code=403, detail="Admins only")
+
+    data = utils._load_penalties()
+    updated = [p for p in data if p["penalty_id"] != penalty_id]
+    if len(updated) == len(data):
+        raise HTTPException(status_code=404, detail="Penalty not found")
+
+    utils._save_penalties(updated)
+    return {"message": f"Penalty {penalty_id} deleted successfully."}
