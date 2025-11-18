@@ -4,6 +4,7 @@ from typing import List, Optional
 from backend.reviews import utils, schemas
 from backend.authentication.security import get_current_user
 from backend.core.authz import block_if_penalized
+from backend.authentication.security import get_current_user, get_optional_user
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
@@ -17,6 +18,8 @@ def list_reviews(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     current_user=Depends(get_current_user)
+    current_user=Depends(get_optional_user)
+
 ):
     """List reviews for a movie with optional filtering, sorting, and pagination."""
     return utils.filter_sort_reviews(movie_id, rating, sort_by, order, skip, limit)
@@ -24,6 +27,11 @@ def list_reviews(
 
 @router.get("/{movie_id}/{review_id}", response_model=schemas.Review)
 def get_review(movie_id: str, review_id: str, current_user=Depends(get_current_user)):
+def get_review(
+    movie_id: str, 
+    review_id: str, 
+    current_user=Depends(get_optional_user)
+):
     review = utils.get_review(movie_id, review_id)
     if not review:
         raise HTTPException(status_code=404, detail="Review not found.")
