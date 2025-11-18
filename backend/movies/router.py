@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import FileResponse
 from typing import List, Optional
-from backend.authentication.security import get_current_user
+from backend.authentication.security import get_current_user, get_optional_user
 from backend.movies import utils, schemas
 import os, json, tempfile
 from backend.penalties import utils as penalty_utils
