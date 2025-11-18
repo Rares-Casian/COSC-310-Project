@@ -1,9 +1,10 @@
 """Movie review creation, editing, deletion, and voting routes."""
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 from backend.reviews import utils, schemas
 from backend.authentication.security import get_current_user
 from backend.core.authz import block_if_penalized
+from backend.core.exceptions import NotFoundError, ForbiddenError, ValidationError, review_not_found
 
 router = APIRouter(prefix="/reviews", tags=["Reviews"])
 
@@ -26,7 +27,7 @@ def list_reviews(
 def get_review(movie_id: str, review_id: str, current_user=Depends(get_current_user)):
     review = utils.get_review(movie_id, review_id)
     if not review:
-        raise HTTPException(status_code=404, detail="Review not found.")
+        raise review_not_found(review_id)
     return review
 
 
@@ -38,7 +39,7 @@ async def add_review(movie_id: str, review_data: schemas.ReviewCreate, current_u
     try:
         return utils.add_review(movie_id, review_data, current_user.user_id)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise ValidationError(str(e))
 
 
 
@@ -48,9 +49,9 @@ async def edit_review(movie_id: str, review_id: str, updates: schemas.ReviewUpda
     """Edit a review; allowed for the author or an administrator."""
     review = utils.get_review(movie_id, review_id)
     if not review:
-        raise HTTPException(status_code=404, detail="Review not found.")
+        raise review_not_found(review_id)
     if review["user_id"] != current_user.user_id and current_user.role != "administrator":
-        raise HTTPException(status_code=403, detail="Not authorized to edit this review.")
+        raise ForbiddenError("Not authorized to edit this review.")
     return utils.update_review(movie_id, review_id, updates)
 
 
@@ -58,12 +59,12 @@ async def edit_review(movie_id: str, review_id: str, updates: schemas.ReviewUpda
 def delete_review(movie_id: str, review_id: str, current_user=Depends(get_current_user)):
     """Delete a review; allowed for the author, administrator, or moderator."""
     review = utils.get_review(movie_id, review_id)
-    if not review:
-        raise HTTPException(status_code=404, detail="Review not found.")
+     if not review:
+        raise review_not_found(review_id)
     if review["user_id"] != current_user.user_id and current_user.role not in ("administrator", "moderator"):
-        raise HTTPException(status_code=403, detail="Not authorized to delete this review.")
+        raise ForbiddenError("Not authorized to delete this review.")
     if not utils.delete_review(movie_id, review_id):
-        raise HTTPException(status_code=404, detail="Review not found.")
+        raise review_not_found(review_id)
     return {"message": "Review deleted successfully."}
 
 
@@ -73,5 +74,5 @@ def vote_review(movie_id: str, review_id: str, vote: schemas.Vote, current_user=
     """Vote whether a review was helpful or not."""
     updated = utils.add_vote(movie_id, review_id, vote)
     if not updated:
-        raise HTTPException(status_code=404, detail="Review not found.")
+        raise review_not_found(review_id)
     return updated
