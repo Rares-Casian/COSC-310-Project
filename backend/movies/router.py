@@ -1,7 +1,7 @@
 # Movies Router — Handles all movie browsing and watch-later features.
 
 
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from fastapi.responses import FileResponse
 from typing import List, Optional
 from backend.authentication.security import get_current_user
@@ -20,7 +20,7 @@ def download_movies(background_tasks: BackgroundTasks, current_user: dict = Depe
     """
     movies = utils.load_movies()
     if not movies:
-        raise HTTPException(status_code=404, detail="No movies found.")
+        raise NotFoundError("No movies found.")
 
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
     with open(tmp_file.name, "w") as f:
@@ -48,7 +48,7 @@ def get_watch_later(
 
     if user_id:
         if current_user.role != "administrator":
-            raise HTTPException(status_code=403, detail="Not authorized to view other users' lists.")
+            raise ForbiddenError("Not authorized to view other users' lists.")
         target_id = user_id
 
     movies = utils.get_watch_later(target_id)
@@ -70,24 +70,24 @@ def modify_watch_later(
     # Check for suspension
     restriction = penalty_utils.check_active_penalty(current_user.user_id, ["suspension"])
     if restriction:
-        raise HTTPException(status_code=403, detail=restriction)
+        raise ForbiddenError(restriction)
 
     # Validate action
     if update.action not in ["add", "remove"]:
-        raise HTTPException(status_code=400, detail="Invalid action. Use 'add' or 'remove'.")
+        raise ValidationError("Invalid action. Use 'add' or 'remove'.")
 
     # Check movie existence
     movie = utils.get_movie(update.movie_id)
     if not movie:
-        raise HTTPException(status_code=404, detail="Movie not found")
+        raise movie_not_found(update.movie_id)
 
     # Determine target
     target_id = current_user.user_id
     if user_id:
         if current_user.role != "administrator":
-            raise HTTPException(status_code=403, detail="Not authorized to modify other users' lists.")
+            raise ForbiddenError("Not authorized to modify other users' lists.")
         target_id = user_id
-
+        
     utils.update_watch_later(target_id, update.movie_id, update.action)
     return {"message": f"Movie {update.action}ed to {('user '+target_id) if user_id else 'your'} watch-later list."}
 
@@ -110,5 +110,5 @@ def search_movies(
 def get_movie(movie_id: str, current_user: schemas.UserToken = Depends(get_current_user)):
     movie = utils.get_movie(movie_id)
     if not movie:
-        raise HTTPException(status_code=404, detail="Movie not found")
+        raise movie_not_found(movie_id)
     return movie
