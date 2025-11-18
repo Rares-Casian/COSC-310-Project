@@ -29,6 +29,17 @@ def user_already_reviewed(movie_id: str, user_id: str) -> bool:
             return movie_id in u.get("movies_reviewed", [])
     return False
 
+def is_critic_review(review: Dict) -> bool:
+    """Check if a review is from a critic by checking the user's role."""
+    user_id = review.get("user_id", "")
+    if not user_id:
+        return False
+    
+    users = load_active_users()
+    for u in users:
+        if u.get("user_id") == user_id:
+            return u.get("role", "").lower() == "critic"
+    return False
 
 def add_review(movie_id: str, review_data, user_id: str):
     """Add a new review for a movie; ensures unique ID and timestamp."""
