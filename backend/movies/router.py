@@ -71,7 +71,7 @@ def modify_watch_later(
     return {"message": f"Movie {update.action}ed to {('user '+target_id) if user_id else 'your'} watch-later list."}
 
 @router.get("/search", response_model=List[schemas.Movie])
-def list_movies(
+def search_movies(
     params: schemas.MovieSearchParams = Depends(),
     current_user: schemas.UserToken = Depends(get_current_user) #Requires a valid user token (`get_current_user`).
 ):
