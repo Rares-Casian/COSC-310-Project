@@ -1,69 +1,52 @@
-import os, json
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+"""Authentication utilities: load/save users, handle revoked tokens."""
+from typing import Any, Dict, List, Optional, Tuple
+from backend.core.paths import (
+    USERS_ACTIVE_FILE, USERS_INACTIVE_FILE, REVOKED_TOKENS_FILE
+)
+from backend.core.jsonio import load_json, save_json
 from backend.authentication import schemas
 
-BASE_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'users')
-ACTIVE_FILE = os.path.join(BASE_DIR, 'users_active.json')
-INACTIVE_FILE = os.path.join(BASE_DIR, 'users_inactive.json')
-REVOKED_TOKENS_FILE = os.path.join(BASE_DIR, "revoked_tokens.json")
 
-def _convert_datetime_to_string(obj: Any) -> Any:
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    elif isinstance(obj, dict):
-        return {k: _convert_datetime_to_string(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [_convert_datetime_to_string(item) for item in obj]
-    else:
-        return obj
-
-def _load_json(file_path: str) -> List[Dict[str, Any]]:
-    if not os.path.exists(file_path):
-        return []
-    with open(file_path, 'r') as f:
-        try:
-            return json.load(f)
-        except json.JSONDecodeError:
-            return []
-
-def _save_json(file_path: str, data: List[Dict[str, Any]]):
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    data_serializable = _convert_datetime_to_string(data)
-    with open(file_path, 'w') as f:
-        json.dump(data_serializable, f, indent=4)
-
-def load_all_users() -> List[Dict[str, Any]]:
-    return _load_json(ACTIVE_FILE) + _load_json(INACTIVE_FILE)
+# ----- User lists -----
 
 def load_active_users() -> List[Dict[str, Any]]:
-    return _load_json(ACTIVE_FILE)
+    return load_json(USERS_ACTIVE_FILE, default=[])
 
-def save_active_users(users: List[Dict[str, Any]]):
-    _save_json(ACTIVE_FILE, users)
+
+def save_active_users(users: List[Dict[str, Any]]) -> None:
+    save_json(USERS_ACTIVE_FILE, users)
+
 
 def load_inactive_users() -> List[Dict[str, Any]]:
-    return _load_json(INACTIVE_FILE)
+    return load_json(USERS_INACTIVE_FILE, default=[])
 
-def save_inactive_users(users: List[Dict[str, Any]]):
-    _save_json(INACTIVE_FILE, users)
 
-def user_exists(username: str, email: str) -> tuple[bool, Optional[str]]:
+def save_inactive_users(users: List[Dict[str, Any]]) -> None:
+    save_json(USERS_INACTIVE_FILE, users)
+
+
+def load_all_users() -> List[Dict[str, Any]]:
+    return load_active_users() + load_inactive_users()
+
+
+# ----- Helpers -----
+
+def user_exists(username: str, email: str) -> Tuple[bool, Optional[str]]:
     users = load_all_users()
-    username_taken = any(u['username'] == username for u in users)
-    email_taken = any(u['email'] == email for u in users)
+    username_taken = any(u.get("username") == username for u in users)
+    email_taken = any(u.get("email") == email for u in users)
     if username_taken and email_taken:
         return True, "Username and Email already taken"
-    elif username_taken:
+    if username_taken:
         return True, "Username already taken"
-    elif email_taken:
+    if email_taken:
         return True, "Email already taken"
     return False, None
 
-def add_user(user: Dict[str, Any], active: bool = True):
-    if 'penalties' not in user:
-        user['penalties'] = []
-    
+
+def add_user(user: Dict[str, Any], *, active: bool = True) -> None:
+    """Add user to the active or inactive list."""
+    user.setdefault("penalties", [])
     if active:
         users = load_active_users()
         users.append(user)
@@ -75,31 +58,31 @@ def add_user(user: Dict[str, Any], active: bool = True):
 
 
 def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
-    for user in load_all_users():
-        if user['user_id'] == user_id:
-            return user
-    return None
-
+    return next((u for u in load_all_users() if u.get("user_id") == user_id), None)
 
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
-    for user in load_all_users():
-        if user['username'] == username:
-            return user
+    return next((u for u in load_all_users() if u.get("username") == username), None)
+
+def get_user_by_username_or_email(identifier: str) -> Optional[Dict[str, Any]]:
+    """Return a user by either username or email (case-insensitive for email)."""
+    users = load_all_users()
+    for u in users:
+        if u.get("username") == identifier or u.get("email").lower() == identifier.lower():
+            return u
     return None
 
-
 def update_user_status(user_id: str, status: schemas.UserStatus) -> bool:
+    """Move user between active/inactive and update status."""
     active_users = load_active_users()
     inactive_users = load_inactive_users()
-
     user = None
-    active_users = [u for u in active_users if not (u['user_id'] == user_id and (user := u))]
-    inactive_users = [u for u in inactive_users if not (u['user_id'] == user_id and (user := u))]
 
+    active_users = [u for u in active_users if not (u.get("user_id") == user_id and (user := u))]
+    inactive_users = [u for u in inactive_users if not (u.get("user_id") == user_id and (user := u))]
     if not user:
         return False
 
-    user['status'] = status.value
+    user["status"] = status.value
     if status == schemas.UserStatus.ACTIVE:
         active_users.append(user)
     else:
@@ -110,19 +93,11 @@ def update_user_status(user_id: str, status: schemas.UserStatus) -> bool:
     return True
 
 
+# ----- Revoked tokens -----
 
-def load_revoked_tokens() -> list[str]:
-    """Load revoked tokens safely."""
-    if not os.path.exists(REVOKED_TOKENS_FILE):
-        return []
-    with open(REVOKED_TOKENS_FILE, "r") as f:
-        try:
-            content = f.read().strip()
-            return json.loads(content) if content else []
-        except json.JSONDecodeError:
-            return []
+def load_revoked_tokens() -> List[str]:
+    return load_json(REVOKED_TOKENS_FILE, default=[])
 
-def save_revoked_tokens(tokens: list[str]):
-    os.makedirs(os.path.dirname(REVOKED_TOKENS_FILE), exist_ok=True)
-    with open(REVOKED_TOKENS_FILE, "w") as f:
-        json.dump(tokens, f, indent=4)
+
+def save_revoked_tokens(tokens: List[str]) -> None:
+    save_json(REVOKED_TOKENS_FILE, tokens)

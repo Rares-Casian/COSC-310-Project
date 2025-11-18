@@ -1,4 +1,3 @@
-"""Authentication endpoints: register, login, logout, refresh, password reset."""
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from backend.authentication import schemas, utils, security
@@ -11,15 +10,12 @@ bearer_scheme = HTTPBearer()
 
 @router.post("/register", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: schemas.UserCreate):
-    """Register a new user (with username and password validation)."""
 
-    # --- Username Validation ---
     if len(user.username) < 3 or len(user.username) > 20:
         raise HTTPException(status_code=400, detail="Username must be between 3 and 20 characters long.")
     if not user.username.isalnum():
         raise HTTPException(status_code=400, detail="Username can only contain letters and numbers (no spaces or symbols).")
 
-    # --- Password Validation ---
     password = user.password
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
@@ -32,16 +28,13 @@ def register(user: schemas.UserCreate):
     if not any(c in "!@#$%^&*()-_=+[]{}|;:',.<>?/`~" for c in password):
         raise HTTPException(status_code=400, detail="Password must include at least one special character.")
 
-    # --- Email Validation ---
     if "@" not in user.email or "." not in user.email.split("@")[-1]:
         raise HTTPException(status_code=400, detail="Invalid email address format.")
 
-    # --- Existing user check ---
     exists, message = utils.user_exists(user.username, user.email)
     if exists:
         raise HTTPException(status_code=400, detail=message)
 
-    # --- Create User ---
     new_user = {
         "user_id": str(uuid.uuid4()),
         "username": user.username,
@@ -62,7 +55,6 @@ def register(user: schemas.UserCreate):
 
 @router.post("/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Authenticate user and issue an access token."""
     user = utils.get_user_by_username_or_email(form_data.username)
     if not user or not security.verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid username/email or password")
@@ -78,14 +70,12 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    """Revoke the current access token."""
     tokens.revoke_token(credentials.credentials)
     return {"message": "Logged out successfully."}
 
 
 @router.post("/refresh", response_model=schemas.Token)
 def refresh_token(current_user: schemas.TokenData = Depends(security.get_current_user)):
-    """Issue a new access token for the authenticated user."""
     token = security.create_access_token(
         data={"sub": current_user.user_id, "role": current_user.role, "status": current_user.status}
     )
@@ -94,7 +84,6 @@ def refresh_token(current_user: schemas.TokenData = Depends(security.get_current
 
 @router.post("/password/request")
 def request_password_reset(email: str):
-    """Simulated password reset request (returns token for development)."""
     users = utils.load_all_users()
     user = next((u for u in users if u["email"] == email), None)
     if not user:
@@ -106,7 +95,6 @@ def request_password_reset(email: str):
 
 @router.post("/password/reset")
 def reset_password(token: str, new_password: str):
-    """Confirm password reset and persist hashed password to correct file."""
     user_id = security.verify_reset_token(token)
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid or expired token")
