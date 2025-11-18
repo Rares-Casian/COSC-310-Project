@@ -112,3 +112,26 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(b
         role=payload["role"],
         status=payload["status"],
     )
+    
+optional_bearer_scheme = HTTPBearer(auto_error=False)
+
+async def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer_scheme)
+) -> Optional[schemas.TokenData]:
+
+    if not credentials:
+        return None
+    
+    token = credentials.credentials
+    payload = verify_access_token(token)
+    if not payload:
+        return None
+
+    if payload.get("status") != schemas.UserStatus.ACTIVE.value:
+        return None
+
+    return schemas.TokenData(
+        user_id=payload["sub"],
+        role=payload["role"],
+        status=payload["status"],
+    )
