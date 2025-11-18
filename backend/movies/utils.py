@@ -95,7 +95,6 @@ def get_movie(movie_id: str) -> Optional[Dict]:
     path = os.path.join(MOVIES_DIR, f"{movie_id}.json")
     if not os.path.exists(path):
         return None
-    return _load_json(path)
     movie = _load_json(path)
     if movie:
         movie = enrich_movie_with_scores(movie)
