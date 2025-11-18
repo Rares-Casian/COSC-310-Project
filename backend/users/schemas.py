@@ -1,38 +1,30 @@
-"""
-Pydantic schemas for user management and admin CRUD operations.
-"""
-
-from pydantic import BaseModel, EmailStr, Field
-from typing import List, Optional
-from uuid import uuid4
+"""User profile and admin CRUD schemas."""
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
-# =========================
-# 🔹 BASE SCHEMAS
-# =========================
-
-class UserPublic(BaseModel):
-    user_id: str
+class UserBase(BaseModel):
     username: str
     email: EmailStr
+
+
+class UserPublic(UserBase):
+    user_id: str
     role: str
     status: str
-    movies_reviewed: List[str]
-    watch_later: List[str]
-    penalties: List[str]
-
-
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role: str = Field(default="member")
-    status: str = Field(default="active")
+    movies_reviewed: list[str] = []
+    watch_later: list[str] = []
+    penalties: list[str] = []
 
 
 class UserSelfUpdate(BaseModel):
-    username: Optional[str]
-    email: Optional[EmailStr]
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+
+class UserAdminUpdate(UserSelfUpdate):
+    role: Optional[str] = None
+    status: Optional[str] = None
 
 
 class PasswordChange(BaseModel):
@@ -41,22 +33,4 @@ class PasswordChange(BaseModel):
 
 
 class StatusUpdate(BaseModel):
-    status: str
-
-
-class UserAdminUpdate(BaseModel):
-    username: Optional[str] = None
-    email: Optional[EmailStr] = None
-    role: Optional[str] = None
-    status: Optional[str] = None
-
-
-# =========================
-# 🔹 TOKEN SCHEMA
-# =========================
-
-class UserToken(BaseModel):
-    user_id: str
-    username: str
-    email: EmailStr
-    role: str
+    status: str  # validated in router to be 'active' or 'inactive'
