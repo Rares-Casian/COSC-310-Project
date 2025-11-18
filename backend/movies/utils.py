@@ -5,9 +5,74 @@ import os, json, glob
 from typing import List, Dict, Optional
 from datetime import datetime
 from backend.authentication.utils import _load_json, _save_json
+from backend.reviews import utils as review_utils
 
 MOVIES_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "movies")
 USERS_ACTIVE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "users", "users_active.json")
+REVIEWS_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "reviews")
+
+
+# score calculation for public/critic scores
+def load_reviews_for_movie(movie_id: str) -> List[Dict]:
+    """Load all reviews for a specific movie."""
+    file_path = os.path.join(REVIEWS_DIR, f"{movie_id}_reviews.json")
+    if not os.path.exists(file_path):
+        return []
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def calculate_critic_score(movie_id: str) -> Optional[float]:
+    reviews = load_reviews_for_movie(movie_id)
+    if not reviews:
+        return None
+    
+    critic_ratings = []
+    for review in reviews:
+        if review_utils.is_critic_review(review):
+            rating = review.get("rating")
+            if rating is not None and 0 <= rating <= 10:
+                critic_ratings.append(rating)
+    
+    if not critic_ratings:
+        return None
+    
+    return round(sum(critic_ratings) / len(critic_ratings), 2)
+
+
+def calculate_public_score(movie_id: str) -> Optional[float]:
+    reviews = load_reviews_for_movie(movie_id)
+    if not reviews:
+        return None
+    
+    public_ratings = []
+    for review in reviews:
+        if not review_utils.is_critic_review(review):
+            rating = review.get("rating")
+            if rating is not None and 0 <= rating <= 10:
+                public_ratings.append(rating)
+    
+    if not public_ratings:
+        return None
+    
+    return round(sum(public_ratings) / len(public_ratings), 2)
+
+
+def enrich_movie_with_scores(movie: Dict) -> Dict:
+    enriched = movie.copy()
+    movie_id = movie.get("movie_id")
+    
+    if movie_id:
+        critic_score = calculate_critic_score(movie_id)
+        public_score = calculate_public_score(movie_id)
+        enriched["critic_score"] = critic_score
+        enriched["public_score"] = public_score
+    
+    return enriched
+
 
 
 # ---------- MOVIE OPERATIONS ----------
@@ -31,6 +96,10 @@ def get_movie(movie_id: str) -> Optional[Dict]:
     if not os.path.exists(path):
         return None
     return _load_json(path)
+    movie = _load_json(path)
+    if movie:
+        movie = enrich_movie_with_scores(movie)
+    return movie
 
 
 def _parse_year(date_str: Optional[str]) -> Optional[int]:
