@@ -1,115 +1,70 @@
-
-from pydantic import BaseModel, Field
-from typing import Optional, Literal
+"""Penalty data models and helpers for expiry/time remaining."""
+from enum import Enum
 from datetime import datetime, timedelta
-import uuid
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
-PenaltyType = Literal[
-    "review_ban",
-    "report_ban",
-    "posting_ban",
-    "suspension",
-    "warning"
-]
+class PenaltyStatus(str, Enum):
+    active = "active"
+    expired = "expired"
+    resolved = "resolved"
 
-PenaltySeverity = Literal["minor", "moderate", "severe"]
-PenaltyStatus = Literal["active", "resolved", "expired"]
 
-class PenaltyBase(BaseModel):
+class PenaltyType(str, Enum):
+    suspension = "suspension"
+    review_ban = "review_ban"
+    report_ban = "report_ban"
+    posting_ban = "posting_ban"
+
+
+class Severity(str, Enum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+
+class PenaltyCreate(BaseModel):
     user_id: str
     type: PenaltyType
-    severity: PenaltySeverity = "minor"
+    severity: Severity
     reason: str
-    notes: Optional[str] = None
+    duration_days: Optional[int] = Field(None, ge=1, description="If None, treat as indefinite until resolved")
 
 
-class PenaltyCreate(PenaltyBase):
-    """
-    Schema used when an admin or moderator issues a new penalty.
-
-    Fields required from client:
-    - user_id
-    - type
-    - severity
-    - reason
-    - (optional) duration_days → custom override for default duration
-    """
-    duration_days: Optional[int] = None
-
-
-class Penalty(PenaltyBase):
-    penalty_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+class Penalty(BaseModel):
+    penalty_id: str
+    user_id: str
+    type: PenaltyType
+    severity: Severity
+    reason: str
     issued_by: str
-    issued_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
-    expires_at: Optional[str] = None
-    status: PenaltyStatus = "active"
-
-    class Config:
-        orm_mode = True
-
-
-    def has_expired(self) -> bool:
-        """Return True if this penalty's expiry date has passed."""
-        if not self.expires_at:
-            return False
-        try:
-            return datetime.utcnow() > datetime.fromisoformat(self.expires_at)
-        except Exception:
-            return False
+    issued_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: Optional[datetime] = None
+    status: PenaltyStatus = PenaltyStatus.active
+    notes: Optional[str] = None
+    resolved_by: Optional[str] = None
+    resolved_at: Optional[str] = None
 
     @property
     def time_remaining(self) -> Optional[str]:
-        if not self.expires_at:
+        if self.status != PenaltyStatus.active or not self.expires_at:
             return None
-        try:
-            remaining = datetime.fromisoformat(self.expires_at) - datetime.utcnow()
-            if remaining.total_seconds() <= 0:
-                return "Expired"
-            days, seconds = remaining.days, remaining.seconds
-            hours = seconds // 3600
-            minutes = (seconds % 3600) // 60
-            if days > 0:
-                return f"{days}d {hours}h remaining"
-            elif hours > 0:
-                return f"{hours}h {minutes}m remaining"
-            else:
-                return f"{minutes}m remaining"
-        except Exception:
-            return None
+        delta = self.expires_at - datetime.utcnow()
+        if delta.total_seconds() <= 0:
+            return "0d 0h 0m"
+        days = delta.days
+        hours = (delta.seconds // 3600)
+        minutes = (delta.seconds % 3600) // 60
+        return f"{days}d {hours}h {minutes}m"
 
-    @property
-    def time_remaining_seconds(self) -> Optional[int]:
-        """Exact seconds remaining until expiry (useful for countdown timers)."""
-        if not self.expires_at:
-            return None
-        try:
-            remaining = datetime.fromisoformat(self.expires_at) - datetime.utcnow()
-            return max(0, int(remaining.total_seconds()))
-        except Exception:
-            return None
+    def has_expired(self) -> bool:
+        return bool(self.expires_at and datetime.utcnow() >= self.expires_at)
 
-def calculate_expiry(
-    p_type: PenaltyType,
-    severity: PenaltySeverity,
-    duration_days: Optional[int] = None
-) -> Optional[str]:
-    now = datetime.utcnow()
 
-    if duration_days and duration_days > 0:
-        return (now + timedelta(days=duration_days)).isoformat()
-
-    if p_type == "warning":
-        return None
-
-    match severity:
-        case "minor":
-            return (now + timedelta(days=3)).isoformat()
-        case "moderate":
-            return (now + timedelta(days=7)).isoformat()
-        case "severe":
-            if p_type == "suspension":
-                return (now + timedelta(days=30)).isoformat()
-            return (now + timedelta(days=14)).isoformat()
-        case _:
-            return (now + timedelta(days=7)).isoformat()
+def calculate_expiry(p_type: PenaltyType, severity: Severity, duration_days: Optional[int]) -> Optional[datetime]:
+    """Compute expiry. If duration_days provided, prefer it; otherwise derive a default window by severity."""
+    if duration_days is not None:
+        return datetime.utcnow() + timedelta(days=duration_days)
+    defaults = {Severity.low: 3, Severity.medium: 7, Severity.high: 30}
+    return datetime.utcnow() + timedelta(days=defaults.get(severity, 7))
