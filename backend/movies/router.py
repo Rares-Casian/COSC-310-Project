@@ -12,27 +12,14 @@ from backend.core.jsonio import save_json
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
 
-@router.get("/download")
-def download_movies(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
-    """
-    Combine all individual movie JSONs into one downloadable file.
-    Automatically deletes the temporary export file after sending.
-    """
+@router.get("/", response_model=List[schemas.Movie])
+def list_movies(params: schemas.MovieSearchParams = Depends(), current_user: UserToken = Depends(get_current_user)):
+    """List, search, sort, and paginate movies."""
     movies = utils.load_movies()
-    if not movies:
-        raise HTTPException(status_code=404, detail="No movies found.")
+    movies = utils.filter_movies(movies, params)
+    movies = utils.sort_movies(movies, params.sort_by, params.order)
+    return utils.paginate_movies(movies, params.page, params.limit)
 
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-    with open(tmp_file.name, "w") as f:
-        json.dump(movies, f, indent=4)
-
-    background_tasks.add_task(os.remove, tmp_file.name)
-
-    return FileResponse(
-        tmp_file.name,
-        filename="movies.json",
-        media_type="application/json"
-    )
 
 @router.get("/download")
 def download_movies(background_tasks: BackgroundTasks, current_user: UserToken = Depends(get_current_user)):
