@@ -20,7 +20,7 @@ def load_movies() -> List[Dict]:
                 movie = json.load(f)
                 movies.append(movie)
         except json.JSONDecodeError as e:
-            # ✅ CHANGED: log invalid JSON instead of silently skipping
+            #  log invalid JSON instead of silently skipping
             print(f"[WARN] Skipping invalid movie file {file}: {e}")
     return movies
 
@@ -58,7 +58,7 @@ def filter_movies(movies: List[Dict], params) -> List[Dict]:
         if params.star and not any(params.star.lower() in s.lower() for s in m.get("main_stars", [])):
             continue
 
-        # ✅ FIXED: Corrected max_rating comparison direction
+        # Corrected max_rating comparison direction
         if params.min_rating and (m.get("imdb_rating") or 0) < params.min_rating:
             continue
         if params.max_rating and (m.get("imdb_rating") or 10) > params.max_rating:

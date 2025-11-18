@@ -1,6 +1,5 @@
-# 🎬 Movies Schemas — Pydantic models for validation, filtering, and watch-later management.
-# ✅ Added WatchLaterResponse model for cleaner documentation and typing.
-
+# Movies Schemas — Pydantic models for validation, filtering, and watch-later management.
+#  Added WatchLaterResponse model for cleaner documentation and typing.
 from pydantic import BaseModel
 from typing import List, Optional, Literal
 
@@ -42,13 +41,13 @@ class WatchLaterUpdate(BaseModel):
     action: Literal["add", "remove"]
 
 
-# ✅ NEW: response schema for /watch-later routes
+#  response schema for /watch-later routes
 class WatchLaterResponse(BaseModel):
     user_id: str
     watch_later: List[Movie]
 
 
-# ✅ Helper schema for authenticated users (used in router typing)
+#  Helper schema for authenticated users (used in router typing)
 class UserToken(BaseModel):
     user_id: str
     username: str
