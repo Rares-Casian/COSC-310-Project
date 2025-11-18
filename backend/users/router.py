@@ -25,6 +25,7 @@ def get_my_profile(current_user: schemas.UserToken = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="User not found.")
     return user
 
+
 @router.patch("/me", response_model=schemas.UserPublic)
 def update_my_profile(
     update: schemas.UserSelfUpdate,
@@ -57,6 +58,7 @@ def change_my_status(
         )
 
     return utils.update_user_status(current_user.user_id, update.status)
+
 
 # =========================
 # 🔹 ADMIN ROUTES
@@ -113,6 +115,16 @@ def create_user_admin(
     if current_user.role != "administrator":
         raise HTTPException(status_code=403, detail="Not authorized.")
     return utils.add_user(new_user)
+
+
+
+
+
+
+
+
+
+
 
 
 
