@@ -84,3 +84,10 @@ def search_movies(
     #Painate the results base on page number and page size
     movies = utils.paginate_movies(movies, params.page, params.limit)
     return movies
+#get movie base on movie_id
+@router.get("/{movie_id}", response_model=schemas.Movie)
+def get_movie(movie_id: str, current_user: schemas.UserToken = Depends(get_current_user)):
+    movie = utils.get_movie(movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return movie
