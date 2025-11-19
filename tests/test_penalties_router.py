@@ -9,16 +9,10 @@ app = FastAPI()
 app.include_router(router)
 client = TestClient(app)
 
-
-# ----------------------------------------------------------------------
-# Fake users
-# ----------------------------------------------------------------------
-
 class DummyUser:
     def __init__(self, user_id="admin123", role="administrator"):
         self.user_id = user_id
         self.role = role
-
 
 @pytest.fixture
 def admin_user():
@@ -33,11 +27,6 @@ def mod_user():
 @pytest.fixture
 def member_user():
     return DummyUser(role="member")
-
-
-# ----------------------------------------------------------------------
-# Fake load/save
-# ----------------------------------------------------------------------
 
 @pytest.fixture
 def fake_load(monkeypatch):
@@ -61,11 +50,6 @@ def fake_load(monkeypatch):
     monkeypatch.setattr(utils, "_load", lambda: data.copy())
     return data
 
-
-# ----------------------------------------------------------------------
-# Admin override
-# ----------------------------------------------------------------------
-
 @pytest.fixture
 def override_admin(admin_user):
     app.dependency_overrides[get_current_user] = lambda: admin_user
@@ -85,11 +69,6 @@ def override_member(member_user):
     app.dependency_overrides[get_current_user] = lambda: member_user
     yield
     app.dependency_overrides.clear()
-
-
-# ----------------------------------------------------------------------
-# TESTS
-# ----------------------------------------------------------------------
 
 def test_list_all_penalties(override_admin, fake_load):
     res = client.get("/penalties/")
