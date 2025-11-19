@@ -4,17 +4,12 @@ from datetime import datetime, timedelta
 from typing import Optional, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
-
-# ───────────────────────────────────────────────────────────────
-# ENUMS
-# ───────────────────────────────────────────────────────────────
-
 PenaltyType = Literal[
-    "review_ban",       # Cannot post/edit reviews
-    "report_ban",       # Cannot submit reports
-    "posting_ban",      # Cannot post reviews or reports
-    "suspension",       # Account temporarily suspended
-    "warning"           # Record-only warning (no expiry)
+    "review_ban",
+    "report_ban",
+    "posting_ban",
+    "suspension",
+    "warning"
 ]
 
 PenaltySeverity = Literal["minor", "moderate", "severe"]
@@ -40,9 +35,6 @@ class Severity(str, Enum):
     high = "high"
 
 
-# ───────────────────────────────────────────────────────────────
-# BASE MODELS
-# ───────────────────────────────────────────────────────────────
 
 class PenaltyBase(BaseModel):
     user_id: str
@@ -91,16 +83,13 @@ class Penalty(BaseModel):
     resolved_at: Optional[str] = None
 
     model_config = ConfigDict(
-        from_attributes=True,      # replaces orm_mode
+        from_attributes=True,
         validate_by_name=True,
         use_enum_values=True,
         extra="forbid",
     )
 
-    # ────────────────────────────────
-    # Computed properties
-    # ────────────────────────────────
-
+    
     def has_expired(self) -> bool:
         """Return True if this penalty's expiry date has passed."""
         if not self.expires_at:
@@ -115,10 +104,6 @@ class Penalty(BaseModel):
 
     @property
     def time_remaining(self) -> Optional[str]:
-        """
-        Human-readable time left until expiry.
-        Examples: '2d 4h remaining', 'Expired', or None if no expiry.
-        """
         if not self.expires_at:
             return None
         try:
@@ -158,22 +143,11 @@ class Penalty(BaseModel):
         except Exception:
             return None
 
-
-# ───────────────────────────────────────────────────────────────
-# EXPIRY CALCULATION
-# ───────────────────────────────────────────────────────────────
-
 def calculate_expiry(
     p_type: PenaltyType,
     severity: PenaltySeverity,
     duration_days: Optional[int] = None
 ) -> Optional[str]:
-    """
-    Determine expiry timestamp based on penalty type, severity, or custom override.
-    - If duration_days > 0 → use custom override.
-    - Otherwise → use default durations based on severity/type.
-    - Warnings never expire.
-    """
     now = datetime.utcnow()
 
     if duration_days and duration_days > 0:

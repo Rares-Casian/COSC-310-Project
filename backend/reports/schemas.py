@@ -1,8 +1,7 @@
 from enum import Enum
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Field, ConfigDict
 
 class ReportStatus(str, Enum):
     pending = "pending"
@@ -23,14 +22,30 @@ class ReportBase(BaseModel):
     reported_id: str = Field(..., description="ID of the item or user being reported")
     reason: str = Field(..., description="Short explanation for the report")
 
+    model_config = ConfigDict(
+        validate_by_name=True,
+        use_enum_values=True,
+        extra="forbid",
+    )
+
 
 class ReportCreate(ReportBase):
-    pass
+    model_config = ConfigDict(
+        validate_by_name=True,
+        use_enum_values=True,
+        extra="forbid",
+    )
 
 
 class ReportUpdate(BaseModel):
     status: ReportStatus
     moderator_notes: Optional[str] = None
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        use_enum_values=True,
+        extra="forbid",
+    )
 
 
 class Report(BaseModel):
@@ -45,8 +60,12 @@ class Report(BaseModel):
     moderator_id: Optional[str] = None
     moderator_notes: Optional[str] = None
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(
+        validate_by_name=True,
+        use_enum_values=True,
+        from_attributes=True, 
+        extra="forbid",
+    )
 
 
 class ReportSummary(BaseModel):
@@ -55,3 +74,8 @@ class ReportSummary(BaseModel):
     under_review: int
     resolved: int
     dismissed: int
+
+    model_config = ConfigDict(
+        validate_by_name=True,
+        extra="forbid",
+    )
