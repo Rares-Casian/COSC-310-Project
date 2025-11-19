@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 from backend.main import app
-from backend.authentication import schemas
+from backend.authentication import schemas, security
 
 client = TestClient(app)
 
@@ -64,17 +64,22 @@ def test_logout():
 def test_refresh_token():
     token_data = schemas.TokenData(user_id="user123", role="member", status="active")
 
-    with patch("backend.authentication.router.security.get_current_user", return_value=token_data), \
-         patch("backend.authentication.router.security.create_access_token", return_value="newtoken123"):
+    def override_current_user():
+        return token_data
 
-        res = client.post(
-            "/auth/refresh",
-            headers={"Authorization": "Bearer oldtoken"},
-        )
+    # Override ONLY the dependency
+    app.dependency_overrides[security.get_current_user] = override_current_user
+
+    # Patch the function that is called inside the route
+    with patch("backend.authentication.router.security.create_access_token", return_value="newtoken123"):
+        res = client.post("/auth/refresh", headers={"Authorization": "Bearer oldtoken"})
+
         assert res.status_code == 200
-        body = res.json()
-        assert body["access_token"] == "newtoken123"
-        assert body["token_type"] == "bearer"
+        assert res.json()["access_token"] == "newtoken123"
+
+    app.dependency_overrides.clear()
+
+
 
 def test_request_password_reset():
     users = [
@@ -85,7 +90,7 @@ def test_request_password_reset():
     ]
 
     with patch("backend.authentication.router.utils.load_all_users", return_value=users), \
-         patch("backend.authentication.router.security.create_reset_token", return_value="reset123"):
+         patch("backend.authentication.security.create_reset_token", return_value="reset123"):
 
         res = client.post("/auth/password/request", params={"email": "alice@example.com"})
         assert res.status_code == 200
@@ -116,24 +121,29 @@ def test_reset_password():
         assert res.status_code == 200
         assert res.json()["message"] == "Password successfully reset"
 
-        # All users are active in this setup
         mock_save_inactive.assert_called_once_with([])
         mock_save_active.assert_called_once()
         saved_active = mock_save_active.call_args[0][0]
         assert saved_active[0]["hashed_password"] == "newhash"
 
 def test_read_current_user():
-    fake_user = {
-        "user_id": "user123",
-        "username": "alice",
-        "email": "alice@example.com",
-        "role": "member",
-        "status": "active",
-    }
+    fake_user = schemas.UserToken(
+        user_id="user123",
+        username="alice",
+        email="alice@example.com",
+        role="member",
+        status="active"
+    )
 
-    with patch("backend.authentication.router.security.get_current_user", return_value=fake_user):
-        res = client.get("/auth/me", headers={"Authorization": "Bearer sometoken"})
-        assert res.status_code == 200
-        body = res.json()
-        assert body["user_id"] == "user123"
-        assert body["username"] == "alice"
+    def override_current_user():
+        return fake_user
+
+    app.dependency_overrides[security.get_current_user] = override_current_user
+
+    res = client.get("/auth/me", headers={"Authorization": "Bearer sometoken"})
+
+    assert res.status_code == 200
+    assert res.json()["user_id"] == "user123"
+
+    app.dependency_overrides.clear()
+
