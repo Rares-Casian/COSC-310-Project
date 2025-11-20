@@ -2,7 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-from backend.users.routes import router
+from backend.users.router import router
 from fastapi import FastAPI
 
 app = FastAPI()
