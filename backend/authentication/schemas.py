@@ -1,10 +1,8 @@
-"""Authentication models: roles, status, user payloads, and tokens."""
 from enum import Enum
 from pydantic import BaseModel, EmailStr, Field
+from pydantic import ConfigDict
 from typing import Optional
 
-
-# --- Enums ---
 class UserRole(str, Enum):
     guest = "guest"
     member = "member"
@@ -17,8 +15,6 @@ class UserStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
 
-
-# --- Token payloads ---
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -29,12 +25,11 @@ class TokenData(BaseModel):
     role: str
     status: str
 
-    class Config:
-        allow_population_by_field_name = True
-        use_enum_values = True
+    model_config = ConfigDict(
+        validate_by_name=True,
+        use_enum_values=True,
+    )
 
-
-# --- User DTOs used by auth endpoints ---
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
@@ -50,11 +45,10 @@ class UserResponse(BaseModel):
     role: str
     status: str
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
 
-
-# For dependency signatures (what get_current_user returns)
 class UserToken(BaseModel):
     user_id: str
     username: str
@@ -62,5 +56,6 @@ class UserToken(BaseModel):
     role: str
     status: str
 
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(
+        use_enum_values=True
+    )
