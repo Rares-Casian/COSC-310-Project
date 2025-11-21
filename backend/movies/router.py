@@ -1,44 +1,41 @@
 # Movies Router — Handles all movie browsing and watch-later features.
 
 
-
-"""Movie browsing and watch-later list routes."""
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, Query, BackgroundTasks
 from fastapi.responses import FileResponse
 from typing import List, Optional
-import tempfile, os
-from backend.authentication.security import get_current_user
-from backend.authentication.schemas import UserToken
+from backend.authentication.security import get_current_user, get_optional_user
 from backend.movies import utils, schemas
-from backend.core.authz import require_role, block_if_penalized
-from backend.core.jsonio import save_json
+from backend.core.exceptions import NotFoundError, ForbiddenError, ValidationError, movie_not_found
+import os, json, tempfile
+from backend.penalties import utils as penalty_utils
 
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
 
-@router.get("/", response_model=List[schemas.Movie])
-def list_movies(params: schemas.MovieSearchParams = Depends(), current_user: UserToken = Depends(get_current_user)):
-    """List, search, sort, and paginate movies."""
-    movies = utils.load_movies()
-    movies = utils.filter_movies(movies, params)
-    movies = utils.sort_movies(movies, params.sort_by, params.order)
-    return utils.paginate_movies(movies, params.page, params.limit)
-
-
 @router.get("/download")
-def download_movies(background_tasks: BackgroundTasks, current_user: UserToken = Depends(get_current_user)):
-    """Download all movies as a single JSON file (admin only)."""
-    require_role(current_user, ["administrator"])
+def download_movies(background_tasks: BackgroundTasks, current_user: dict = Depends(get_current_user)):
+    """
+    Combine all individual movie JSONs into one downloadable file.
+    Automatically deletes the temporary export file after sending.
+    """
     movies = utils.load_movies()
     if not movies:
         raise NotFoundError("No movies found.")
 
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-    save_json(tmp_file.name, movies)
+    with open(tmp_file.name, "w") as f:
+        json.dump(movies, f, indent=4)
+
     background_tasks.add_task(os.remove, tmp_file.name)
-    return FileResponse(tmp_file.name, filename="movies.json", media_type="application/json")
 
+    return FileResponse(
+        tmp_file.name,
+        filename="movies.json",
+        media_type="application/json"
+    )
 
+# ---------------- Watch-Later Routes ----------------
 @router.get("/watch-later", response_model=schemas.WatchLaterResponse)
 def get_watch_later(
     current_user: schemas.UserToken = Depends(get_current_user),
@@ -77,9 +74,6 @@ def modify_watch_later(
         raise ForbiddenError(restriction)
 
     # Validate action
-@block_if_penalized(["suspension"])
-async def modify_watch_later(update: schemas.WatchLaterUpdate, current_user: UserToken = Depends(get_current_user), user_id: Optional[str] = Query(None)):
-    """Add or remove movies from watch-later list. Admin may target another user."""
     if update.action not in ["add", "remove"]:
         raise ValidationError("Invalid action. Use 'add' or 'remove'.")
 
@@ -94,13 +88,34 @@ async def modify_watch_later(update: schemas.WatchLaterUpdate, current_user: Use
         if current_user.role != "administrator":
             raise ForbiddenError("Not authorized to modify other users' lists.")
         target_id = user_id
-        
+
     utils.update_watch_later(target_id, update.movie_id, update.action)
-    return {"message": f"Movie {update.action}ed successfully."}
+    return {"message": f"Movie {update.action}ed to {('user '+target_id) if user_id else 'your'} watch-later list."}
 
-
+@router.get("/search", response_model=List[schemas.Movie])
+def search_movies(
+    params: schemas.MovieSearchParams = Depends(),
+    _current_user: Optional[schemas.UserToken] = Depends(get_optional_user)  # Optional: allows guest access
+):
+    """
+    Search and filter movies. Accessible to guests (no login required).
+    """
+    #Load all movie
+    movies = utils.load_movies()
+    #Apply filter
+    movies = utils.filter_movies(movies, params)
+    #Sort the reulting list by given field and order
+    movies = utils.sort_movies(movies, params.sort_by, params.order)
+    #Painate the results base on page number and page size
+    movies = utils.paginate_movies(movies, params.page, params.limit)
+    return movies
+#get movie base on movie_id
 @router.get("/{movie_id}", response_model=schemas.Movie)
-def get_movie(movie_id: str, current_user: UserToken = Depends(get_current_user)):
+def get_movie(
+    movie_id: str, 
+    _current_user: Optional[schemas.UserToken] = Depends(get_optional_user)  # Optional: allows guest access
+):
+    """Get movie details by ID. Accessible to guests (no login required)."""
     movie = utils.get_movie(movie_id)
     if not movie:
         raise movie_not_found(movie_id)
