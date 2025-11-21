@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 from backend.reviews import utils, schemas
-from backend.authentication.security import get_current_user
+from backend.authentication.security import get_current_user, get_optional_user
 from backend.core.authz import block_if_penalized
 from backend.core.exceptions import NotFoundError, ForbiddenError, ValidationError, review_not_found
 
@@ -17,14 +17,24 @@ def list_reviews(
     order: str = Query("desc", description="Order: asc or desc"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    current_user=Depends(get_current_user)
+    _current_user=Depends(get_optional_user)  # Optional: allows guest access
 ):
-    """List reviews for a movie with optional filtering, sorting, and pagination."""
+    """
+    List reviews for a movie with optional filtering, sorting, and pagination.
+    Accessible to guests (no login required).
+    """
     return utils.filter_sort_reviews(movie_id, rating, sort_by, order, skip, limit)
 
 
 @router.get("/{movie_id}/{review_id}", response_model=schemas.Review)
-def get_review(movie_id: str, review_id: str, current_user=Depends(get_current_user)):
+def get_review(
+    movie_id: str, 
+    review_id: str, 
+    _current_user=Depends(get_optional_user)  # Optional: allows guest access
+):
+    """
+    Get a specific review by ID. Accessible to guests (no login required).
+    """
     review = utils.get_review(movie_id, review_id)
     if not review:
         raise review_not_found(review_id)
@@ -59,7 +69,7 @@ async def edit_review(movie_id: str, review_id: str, updates: schemas.ReviewUpda
 def delete_review(movie_id: str, review_id: str, current_user=Depends(get_current_user)):
     """Delete a review; allowed for the author, administrator, or moderator."""
     review = utils.get_review(movie_id, review_id)
-     if not review:
+    if not review:
         raise review_not_found(review_id)
     if review["user_id"] != current_user.user_id and current_user.role not in ("administrator", "moderator"):
         raise ForbiddenError("Not authorized to delete this review.")
