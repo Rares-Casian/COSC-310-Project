@@ -57,10 +57,7 @@ def get_penalties_for_user(user_id: str) -> List[schemas.Penalty]:
         _save(all_pen)
     return penalties
 
-
-# Alias for dashboards expecting this name
 get_penalties_by_user = get_penalties_for_user
-
 
 def resolve_penalty(penalty_id: str, moderator_id: str, notes: Optional[str] = None) -> None:
     data = _load()
