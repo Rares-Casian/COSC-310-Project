@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 from backend.authentication import utils as auth_utils
 from backend.authentication.schemas import UserCreate, UserToken
 from backend.users import schemas
-from backend.core import exceptions
+from backend.core import exceptions, validators
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -51,6 +51,9 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def change_password(user_id: str, old_password: str, new_password: str) -> None:
+    
+    validators.validate_password(new_password)
+    
     users = load_active_users()
     for user in users:
         if user.get("user_id") == user_id:
