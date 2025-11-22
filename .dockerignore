@@ -1,0 +1,45 @@
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+venv/
+.venv/
+env/
+*/venv/
+*/.venv/
+*/env/
+
+
+.idea/
+.vscode/
+*/.vscode/
+
+
+.DS_Store
+Thumbs.db
+
+
+*.log
+*.tmp
+*.sqlite3
+*.db
+
+# -------------------------------
+# Environment variables (secrets)
+# -------------------------------
+.env
+*.env
+
+# -------------------------------
+# Git files (optional)
+# -------------------------------
+.git
+.gitignore
+
+# -------------------------------
+# Docker specific files (optional)
+# -------------------------------
+*.dockerignore
