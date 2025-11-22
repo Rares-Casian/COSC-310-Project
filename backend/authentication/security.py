@@ -11,12 +11,12 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any
 
 import jwt
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, status, Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 
 from backend.authentication import schemas
-from backend.core import tokens
+from backend.core import tokens, exceptions
 from backend.authentication.security_config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 
@@ -107,17 +107,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(b
     token = credentials.credentials
     payload = verify_access_token(token)
     if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise exceptions.AuthenticationError("Invalid authentication credentials.")
 
     if payload.get("status") != schemas.UserStatus.ACTIVE.value:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is deactivated.",
-        )
+        raise exceptions.AuthorizationError("Account is deactivated.")
 
     return schemas.TokenData(
         user_id=payload["sub"],
@@ -134,7 +127,7 @@ async def get_current_user_optional(
     Allows guest access for read-only endpoints.
     """
     if not credentials:
-        # Return guest user
+        # Return guest user representation
         return schemas.TokenData(
             user_id="guest",
             role=schemas.UserRole.guest.value,
@@ -144,7 +137,7 @@ async def get_current_user_optional(
     token = credentials.credentials
     payload = verify_access_token(token)
     if not payload:
-        # Invalid token -> guest
+        # Invalid token, treat as guest
         return schemas.TokenData(
             user_id="guest",
             role=schemas.UserRole.guest.value,
@@ -152,10 +145,7 @@ async def get_current_user_optional(
         )
 
     if payload.get("status") != schemas.UserStatus.ACTIVE.value:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is deactivated.",
-        )
+        raise exceptions.AuthorizationError("Account is deactivated.")
 
     return schemas.TokenData(
         user_id=payload["sub"],
