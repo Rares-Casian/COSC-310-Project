@@ -1,10 +1,11 @@
 """Penalty management routes for administrators and moderators."""
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 from backend.penalties import utils, schemas
 from backend.authentication.security import get_current_user
 from backend.core.authz import require_role
+from backend.core import exceptions
 
 router = APIRouter(prefix="/penalties", tags=["Penalties"])
 
@@ -56,7 +57,7 @@ def delete_penalty(penalty_id: str, current_user=Depends(get_current_user)):
     require_role(current_user, ["administrator"])
     data = utils._load()
     if not any(p.get("penalty_id") == penalty_id for p in data):
-        raise HTTPException(status_code=404, detail="Penalty not found.")
+        raise exceptions.NotFoundError("Penalty")
     utils.delete_penalty(penalty_id)
     return {"message": f"Penalty {penalty_id} deleted successfully."}
 

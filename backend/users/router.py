@@ -1,9 +1,10 @@
 """User profile and administrative management routes."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from backend.authentication.security import get_current_user
 from backend.authentication.schemas import UserToken
 from backend.users import utils, schemas
 from backend.core.authz import require_role
+from backend.core import exceptions
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 def get_my_profile(current_user: UserToken = Depends(get_current_user)):
     user = utils.get_user_by_id(current_user.user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
+        raise exceptions.NotFoundError("User")
     return user
 
 
@@ -31,7 +32,7 @@ def change_my_password(update: schemas.PasswordChange, current_user: UserToken =
 @router.patch("/me/status")
 def change_my_status(update: schemas.StatusUpdate, current_user: UserToken = Depends(get_current_user)):
     if update.status not in ["active", "inactive"]:
-        raise HTTPException(status_code=400, detail="Invalid status value.")
+        raise exceptions.ValidationError("Invalid status value.")
     return utils.update_user_status(current_user.user_id, update.status)
 
 
@@ -47,7 +48,7 @@ def get_user(user_id: str, current_user: UserToken = Depends(get_current_user)):
     require_role(current_user, ["administrator"])
     user = utils.get_user_by_id(user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
+        raise exceptions.NotFoundError("User")
     return user
 
 

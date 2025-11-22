@@ -1,7 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from backend.authentication import schemas, utils, security
-from backend.core import tokens
+from backend.core import tokens, exceptions
 import uuid
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -12,28 +12,28 @@ bearer_scheme = HTTPBearer()
 def register(user: schemas.UserCreate):
 
     if len(user.username) < 3 or len(user.username) > 20:
-        raise HTTPException(status_code=400, detail="Username must be between 3 and 20 characters long.")
+        raise exceptions.ValidationError("Username must be between 3 and 20 characters long.")
     if not user.username.isalnum():
-        raise HTTPException(status_code=400, detail="Username can only contain letters and numbers (no spaces or symbols).")
+        raise exceptions.ValidationError("Username can only contain letters and numbers (no spaces or symbols).")
 
     password = user.password
     if len(password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+        raise exceptions.ValidationError("Password must be at least 8 characters long.")
     if not any(c.isupper() for c in password):
-        raise HTTPException(status_code=400, detail="Password must include at least one uppercase letter.")
+        raise exceptions.ValidationError("Password must include at least one uppercase letter.")
     if not any(c.islower() for c in password):
-        raise HTTPException(status_code=400, detail="Password must include at least one lowercase letter.")
+        raise exceptions.ValidationError("Password must include at least one lowercase letter.")
     if not any(c.isdigit() for c in password):
-        raise HTTPException(status_code=400, detail="Password must include at least one number.")
+        raise exceptions.ValidationError("Password must include at least one number.")
     if not any(c in "!@#$%^&*()-_=+[]{}|;:',.<>?/`~" for c in password):
-        raise HTTPException(status_code=400, detail="Password must include at least one special character.")
+        raise exceptions.ValidationError("Password must include at least one special character.")
 
     if "@" not in user.email or "." not in user.email.split("@")[-1]:
-        raise HTTPException(status_code=400, detail="Invalid email address format.")
+        raise exceptions.ValidationError("Invalid email address format.")
 
     exists, message = utils.user_exists(user.username, user.email)
     if exists:
-        raise HTTPException(status_code=400, detail=message)
+        raise exceptions.ConflictError(message)
 
     new_user = {
         "user_id": str(uuid.uuid4()),
@@ -57,10 +57,10 @@ def register(user: schemas.UserCreate):
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = utils.get_user_by_username_or_email(form_data.username)
     if not user or not security.verify_password(form_data.password, user["hashed_password"]):
-        raise HTTPException(status_code=401, detail="Invalid username/email or password")
+        raise exceptions.AuthenticationError("Invalid username/email or password")
 
     if user["status"] != schemas.UserStatus.ACTIVE.value:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
+        raise exceptions.AuthorizationError("Account is deactivated")
 
     access_token = security.create_access_token(
         data={"sub": user["user_id"], "role": user["role"], "status": user["status"]}
@@ -87,7 +87,7 @@ def request_password_reset(email: str):
     users = utils.load_all_users()
     user = next((u for u in users if u["email"] == email), None)
     if not user:
-        raise HTTPException(status_code=404, detail="Email not found")
+        raise exceptions.NotFoundError("Email")
 
     token = security.create_reset_token(user["user_id"])
     return {"reset_token": token, "message": "Use this token within 10 minutes."}
@@ -97,7 +97,7 @@ def request_password_reset(email: str):
 def reset_password(token: str, new_password: str):
     user_id = security.verify_reset_token(token)
     if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid or expired token")
+        raise exceptions.ValidationError("Invalid or expired token")
 
     users = utils.load_all_users()
     for user in users:
@@ -105,7 +105,7 @@ def reset_password(token: str, new_password: str):
             user["hashed_password"] = security.hash_password(new_password)
             break
     else:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise exceptions.NotFoundError("User")
 
     active = [u for u in users if u["status"] == "active"]
     inactive = [u for u in users if u["status"] == "inactive"]

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from typing import List
 from backend.reports import utils, schemas
 from backend.authentication.security import get_current_user
 from backend.core.authz import require_role, block_if_penalized
+from backend.core import exceptions
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
@@ -36,7 +37,7 @@ def get_report(report_id: str, current_user=Depends(get_current_user)):
     require_role(current_user, ["moderator", "administrator"])
     report = utils.get_report(report_id)
     if not report:
-        raise HTTPException(status_code=404, detail="Report not found.")
+        raise exceptions.NotFoundError("Report")
     return report
 
 
@@ -45,7 +46,7 @@ def update_report(report_id: str, update: schemas.ReportUpdate, current_user=Dep
     require_role(current_user, ["moderator", "administrator"])
     updated = utils.update_report_status(report_id, update, moderator_id=current_user.user_id)
     if not updated:
-        raise HTTPException(status_code=404, detail="Report not found.")
+        raise exceptions.NotFoundError("Report")
     return updated
 
 
@@ -53,5 +54,5 @@ def update_report(report_id: str, update: schemas.ReportUpdate, current_user=Dep
 def delete_report(report_id: str, current_user=Depends(get_current_user)):
     require_role(current_user, ["administrator"])
     if not utils.delete_report(report_id):
-        raise HTTPException(status_code=404, detail="Report not found.")
+        raise exceptions.NotFoundError("Report")
     return {"message": f"Report {report_id} deleted successfully."}
