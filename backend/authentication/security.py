@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 
@@ -25,6 +25,18 @@ from backend.authentication.security_config import SECRET_KEY, ALGORITHM, ACCESS
 # -----------------------------------------------------------------------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
+
+
+class HTTPBearerOptional(HTTPBearer):
+    """Optional HTTP Bearer authentication that doesn't raise errors if no token is provided."""
+    async def __call__(self, request: Request) -> Optional[HTTPAuthorizationCredentials]:
+        try:
+            return await super().__call__(request)
+        except HTTPException:
+            return None
+
+
+bearer_scheme_optional = HTTPBearerOptional()
 
 
 def hash_password(password: str) -> str:
@@ -99,6 +111,44 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(b
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials.",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if payload.get("status") != schemas.UserStatus.ACTIVE.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deactivated.",
+        )
+
+    return schemas.TokenData(
+        user_id=payload["sub"],
+        role=payload["role"],
+        status=payload["status"],
+    )
+
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme_optional)
+) -> schemas.TokenData:
+    """
+    Extract the current user from the Authorization header if provided, otherwise return a guest user.
+    Allows guest access for read-only endpoints.
+    """
+    if not credentials:
+        # Return guest user
+        return schemas.TokenData(
+            user_id="guest",
+            role=schemas.UserRole.guest.value,
+            status=schemas.UserStatus.ACTIVE.value,
+        )
+    
+    token = credentials.credentials
+    payload = verify_access_token(token)
+    if not payload:
+        # Invalid token -> guest
+        return schemas.TokenData(
+            user_id="guest",
+            role=schemas.UserRole.guest.value,
+            status=schemas.UserStatus.ACTIVE.value,
         )
 
     if payload.get("status") != schemas.UserStatus.ACTIVE.value:
