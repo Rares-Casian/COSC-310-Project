@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from fastapi.responses import FileResponse
 from typing import List, Optional
 import tempfile, os
-from backend.authentication.security import get_current_user
-from backend.authentication.schemas import UserToken
+from backend.authentication.security import get_current_user, get_current_user_optional
+from backend.authentication.schemas import UserToken, TokenData
 from backend.movies import utils, schemas
 from backend.core.authz import require_role, block_if_penalized
 from backend.core.jsonio import save_json
@@ -13,8 +13,8 @@ router = APIRouter(prefix="/movies", tags=["Movies"])
 
 
 @router.get("/", response_model=List[schemas.Movie])
-def list_movies(params: schemas.MovieSearchParams = Depends(), current_user: UserToken = Depends(get_current_user)):
-    """List, search, sort, and paginate movies."""
+def list_movies(params: schemas.MovieSearchParams = Depends(), current_user: TokenData = Depends(get_current_user_optional)):
+    """List, search, sort, and paginate movies. Accessible to guests."""
     movies = utils.load_movies()
     movies = utils.filter_movies(movies, params)
     movies = utils.sort_movies(movies, params.sort_by, params.order)
@@ -64,7 +64,8 @@ async def modify_watch_later(update: schemas.WatchLaterUpdate, current_user: Use
 
 
 @router.get("/{movie_id}", response_model=schemas.Movie)
-def get_movie(movie_id: str, current_user: UserToken = Depends(get_current_user)):
+def get_movie(movie_id: str, current_user: TokenData = Depends(get_current_user_optional)):
+    """Get a specific movie by ID. Accessible to guests."""
     movie = utils.get_movie(movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found.")
