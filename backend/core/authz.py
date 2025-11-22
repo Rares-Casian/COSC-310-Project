@@ -22,6 +22,7 @@ def block_if_penalized(blocked_types: list[str]):
     """
     Decorator that blocks actions if the current user has an active penalty
     matching one of the specified blocked types.
+    Guest users are not subject to penalty checks.
 
     Example:
         @router.post("/reviews")
@@ -32,6 +33,10 @@ def block_if_penalized(blocked_types: list[str]):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, current_user=Depends(get_current_user), **kwargs):
+            # Skip checks for guest users
+            if current_user.user_id == "guest" or current_user.role == "guest":
+                return await func(*args, current_user=current_user, **kwargs)
+            
             # Get user's active penalties (resolves expiries)
             penalties = penalty_utils.get_penalties_for_user(current_user.user_id)
             active_penalties = [
