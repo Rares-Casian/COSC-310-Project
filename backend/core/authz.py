@@ -1,20 +1,18 @@
 """Authorization helpers for role and penalty checks."""
 from functools import wraps
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from backend.authentication.security import get_current_user
 from backend.penalties import utils as penalty_utils
 from backend.users import utils as user_utils
 from backend.penalties import schemas
+from backend.core import exceptions
 
 
 
 def require_role(user, allowed_roles: list[str]):
     """Raise 403 if user does not have one of the allowed roles."""
     if user.role not in allowed_roles:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Access denied: requires one of {allowed_roles}.",
-        )
+        raise exceptions.AuthorizationError(f"Access denied: requires one of {allowed_roles}.")
 
 
 
@@ -33,7 +31,7 @@ def block_if_penalized(blocked_types: list[str]):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, current_user=Depends(get_current_user), **kwargs):
-            # Skip checks for guest users
+            # Skip penalty checks for guest users
             if current_user.user_id == "guest" or current_user.role == "guest":
                 return await func(*args, current_user=current_user, **kwargs)
             
@@ -47,10 +45,7 @@ def block_if_penalized(blocked_types: list[str]):
             # Check if any match blocked types
             for p in active_penalties:
                 if p.type.value in blocked_types:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Action blocked due to active {p.type.value} penalty."
-                    )
+                    raise exceptions.AuthorizationError(f"Action blocked due to active {p.type.value} penalty.")
 
             return await func(*args, current_user=current_user, **kwargs)
         return wrapper
