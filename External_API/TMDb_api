@@ -1,0 +1,49 @@
+import requests
+import os
+import json
+from dotenv import load_dotenv
+
+load_dotenv()
+API_TOKEN = os.getenv("TMDB_API_TOKEN")
+
+
+url = "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1"
+
+headers = {
+    "accept": "application/json",
+    "Authorization": f"Bearer {API_TOKEN}"
+}
+response = requests.get(url, headers=headers)
+
+data = response.json()
+
+def save_tmdb_json(response_json, filename="backend/data/tmdb_data.json"):
+    """
+    Saves TMDb API response to a JSON file with nice formatting.
+    """
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(response_json, f, indent=4, ensure_ascii=False)
+    print(f"Data saved to {filename}")
+
+# Example usage:
+save_tmdb_json(data) # call from outside of this file in the actual implementation
+
+"""
+To use the api set the url to the correct end point which can be found in the documentation
+set the headers to the correct values which can be found in the documentation 
+ 
+To use it for another type of request only change the url and "accept" field leave the "Authorization" feild the same
+
+The data returns by the api will be stores in respose which can than be used. Calling the api will have to be done outside of this file so only one function is called at a time
+
+Delete the save_tmdb_json(data) before using 
+
+To set the token create a .env file in the root directory where the backend folder is 
+and write TMDB_API_TOKEN=INSERT TOKEN HERE 
+
+the token is located in the note/resources channel in the discord 
+
+DO NOT HARD CODE THE API KEY use "API_TOKEN = os.getenv("TMDB_API_TOKEN")"
+the .env file is in the .gitignore so it will not be pushed to the github
+"""
+
