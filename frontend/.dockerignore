@@ -1,0 +1,7 @@
+node_modules
+.next
+.turbo
+npm-debug.log*
+Dockerfile
+docker-compose.yml
+*.local
