@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px 64px;
-  background: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.18), transparent 32%),
-    radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.14), transparent 28%),
+  background: radial-gradient(circle at 18% 18%, rgba(14, 165, 233, 0.2), transparent 36%),
+    radial-gradient(circle at 82% 12%, rgba(99, 102, 241, 0.16), transparent 30%),
     linear-gradient(135deg, #0f172a 0%, #0b1220 45%, #0f172a 100%);
   color: #e2e8f0;
   overflow: hidden;
@@ -37,23 +37,26 @@
   right: -120px;
 }
 
-.shell {
+.grid {
   position: relative;
   z-index: 1;
   width: min(1100px, 100%);
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 18px;
-  align-items: center;
+  gap: 14px;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: start;
 }
 
-.glassCard {
+.card {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 22px;
-  padding: 36px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .tag {
@@ -61,7 +64,7 @@
   align-self: flex-start;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(14, 165, 233, 0.2);
+  background: rgba(14, 165, 233, 0.18);
   color: #7dd3fc;
   font-weight: 700;
   font-size: 12px;
@@ -70,7 +73,7 @@
 }
 
 .title {
-  font-size: clamp(30px, 4vw, 44px);
+  font-size: clamp(28px, 4vw, 38px);
   line-height: 1.2;
   letter-spacing: -0.01em;
 }
@@ -79,25 +82,26 @@
   color: #cbd5e1;
   line-height: 1.7;
   font-size: 16px;
-  margin-top: 8px;
 }
 
 .actions {
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
-.actions a {
+.primary,
+.secondary {
   flex: 1;
-  text-align: center;
   padding: 12px 14px;
   border-radius: 12px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.01em;
   border: 1px solid transparent;
-  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease,
-    transform 0.16s ease, box-shadow 0.16s ease;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease, background 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .primary {
@@ -125,49 +129,48 @@
   }
 }
 
-@media (max-width: 480px) {
-  .shell {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-
-  .glassCard {
-    padding: 28px;
-  }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .actions a {
-    width: 100%;
-  }
+.alert {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  font-weight: 700;
 }
 
-.callouts {
-  display: grid;
-  gap: 10px;
-}
-
-.callout {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.calloutLabel {
+.sectionLabel {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #a5b4fc;
-  margin-bottom: 6px;
   font-weight: 700;
 }
 
-.calloutText {
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   color: #cbd5e1;
-  line-height: 1.6;
-  font-size: 14px;
+}
+
+.list li {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: 26px;
+  }
 }
