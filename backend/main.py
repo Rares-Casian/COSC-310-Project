@@ -14,6 +14,9 @@ from backend.penalties import router as penalties_router
 from backend.users import router as users_router
 from backend.dashboards import router as dashboard_router
 from backend.core import exceptions
+from pathlib import Path
+import json
+from External_API.TMDb_api import getTrending, save_tmdb_json
 
 logger = logging.getLogger(__name__)
 
@@ -100,3 +103,22 @@ app.add_middleware(
 @app.get('/')
 async def read_root():
     return {"message": "Backend is up"}
+
+DATA_FILE = Path(__file__).parent / "data/tmdb_data.json"
+
+@app.get("/trending")
+async def get_trending_movies():
+    save_tmdb_json(getTrending())
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        movies = data.get("results", [])
+        if not isinstance(movies, list):
+            movies = []
+    except Exception as e:
+        print("Failed to read JSON:", e)
+        movies = []
+
+    # Sort by vote_average descending
+    movies_sorted = sorted(movies, key=lambda x: x.get("vote_average", 0), reverse=True)
+    return movies_sorted

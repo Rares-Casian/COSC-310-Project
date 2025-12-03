@@ -242,6 +242,9 @@ export function RoleDashboard({ role }: RoleDashboardProps) {
                   {link.label}
                 </a>
               ))}
+                <a className={styles.sidebarButton} href="/trending">
+                  Trending Movies 
+                </a>
             </div>
           </aside>
 

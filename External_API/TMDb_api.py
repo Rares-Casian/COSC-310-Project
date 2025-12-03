@@ -7,15 +7,17 @@ load_dotenv()
 API_TOKEN = os.getenv("TMDB_API_TOKEN")
 
 
-url = "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1"
+def getTrending():
+    url = "https://api.themoviedb.org/3/movie/popular?language=en-US&page=1"
 
-headers = {
-    "accept": "application/json",
-    "Authorization": f"Bearer {API_TOKEN}"
-}
-response = requests.get(url, headers=headers)
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {API_TOKEN}"
+    }
+    response = requests.get(url, headers=headers)
+    data = response.json()
 
-data = response.json()
+    return data
 
 def save_tmdb_json(response_json, filename="backend/data/tmdb_data.json"):
     """
@@ -26,7 +28,7 @@ def save_tmdb_json(response_json, filename="backend/data/tmdb_data.json"):
     print(f"Data saved to {filename}")
 
 # Example usage:
-save_tmdb_json(data) # call from outside of this file in the actual implementation
+#save_tmdb_json(data)  call from outside of this file in the actual implementation
 
 """
 To use the api set the url to the correct end point which can be found in the documentation
