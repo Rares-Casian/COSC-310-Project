@@ -12,13 +12,20 @@ from backend.reviews import router as reviews_router
 from backend.reports import router as reports_router
 from backend.penalties import router as penalties_router
 from backend.users import router as users_router
+from backend.dashboards import router as dashboard_router
 from backend.core import exceptions
 
 logger = logging.getLogger(__name__)
 
 
+tags_metadata = [
+    {
+        "name": "Dashboard",
+        "description": "Role-specific dashboards for authenticated users.",
+    },
+]
 
-app = FastAPI()
+app = FastAPI(openapi_tags=tags_metadata)
 
 # Include routers
 app.include_router(authentication_router.router)
@@ -27,6 +34,7 @@ app.include_router(reviews_router.router)
 app.include_router(reports_router.router)
 app.include_router(penalties_router.router)
 app.include_router(users_router.router)
+app.include_router(dashboard_router.router)
 
 
 # Exception handlers
@@ -79,7 +87,11 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://frontend:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

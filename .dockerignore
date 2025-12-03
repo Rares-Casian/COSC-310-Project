@@ -27,6 +27,12 @@ Thumbs.db
 *.sqlite3
 *.db
 
+# Node / frontend artifacts
+node_modules
+frontend/.next
+frontend/node_modules
+frontend/.turbo
+
 # -------------------------------
 # Environment variables (secrets)
 # -------------------------------
