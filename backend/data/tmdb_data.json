@@ -21,7 +21,27 @@
             "title": "Zootopia 2",
             "video": false,
             "vote_average": 7.739,
-            "vote_count": 282
+            "vote_count": 304
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/lZYMXx74pWmbj5Q5jp1QaMvmuuR.jpg",
+            "genre_ids": [
+                28,
+                14,
+                53
+            ],
+            "id": 1180831,
+            "original_language": "no",
+            "original_title": "Troll 2",
+            "overview": "When a dangerous new troll unleashes devastation across their homeland, Nora, Andreas and Major Kris embark on their most perilous mission yet.",
+            "popularity": 423.2374,
+            "poster_path": "/p6xAExLNFbHcLfvSuvLPoM8aqZU.jpg",
+            "release_date": "2025-11-30",
+            "title": "Troll 2",
+            "video": false,
+            "vote_average": 6.631,
+            "vote_count": 84
         },
         {
             "adult": false,
@@ -40,8 +60,8 @@
             "release_date": "2025-10-08",
             "title": "TRON: Ares",
             "video": false,
-            "vote_average": 6.419,
-            "vote_count": 484
+            "vote_average": 6.4,
+            "vote_count": 496
         },
         {
             "adult": false,
@@ -60,8 +80,8 @@
             "release_date": "2025-08-16",
             "title": "The Shadow's Edge",
             "video": false,
-            "vote_average": 6.345,
-            "vote_count": 129
+            "vote_average": 6.385,
+            "vote_count": 131
         },
         {
             "adult": false,
@@ -99,8 +119,8 @@
             "release_date": "2024-09-29",
             "title": "High Forces",
             "video": false,
-            "vote_average": 6.1,
-            "vote_count": 22
+            "vote_average": 6.0,
+            "vote_count": 24
         },
         {
             "adult": false,
@@ -119,8 +139,8 @@
             "release_date": "2025-07-30",
             "title": "Dracula",
             "video": false,
-            "vote_average": 7.058,
-            "vote_count": 491
+            "vote_average": 7.1,
+            "vote_count": 498
         },
         {
             "adult": false,
@@ -139,8 +159,8 @@
             "release_date": "2024-10-01",
             "title": "Bureau 749",
             "video": false,
-            "vote_average": 5.917,
-            "vote_count": 48
+            "vote_average": 6.0,
+            "vote_count": 49
         },
         {
             "adult": false,
@@ -159,28 +179,8 @@
             "release_date": "2025-11-19",
             "title": "Wildcat",
             "video": false,
-            "vote_average": 6.409,
-            "vote_count": 22
-        },
-        {
-            "adult": false,
-            "backdrop_path": "/ytCi1wg6YHpYcFRWCO2jpzN31Kf.jpg",
-            "genre_ids": [
-                28,
-                53,
-                80
-            ],
-            "id": 1196573,
-            "original_language": "en",
-            "original_title": "She Rides Shotgun",
-            "overview": "Newly released from prison and marked for death by unrelenting enemies, Nate must now protect his estranged 11-year-old daughter, Polly, at all costs. With scant resources and no one to trust, Nate and Polly forge a bond under fire as he shows her how to fight and survive—and she teaches him the true meaning of unconditional love.",
-            "popularity": 178.292,
-            "poster_path": "/nvqW8mOm818QDio3GKKmPLK8kXj.jpg",
-            "release_date": "2025-07-31",
-            "title": "She Rides Shotgun",
-            "video": false,
-            "vote_average": 7.157,
-            "vote_count": 118
+            "vote_average": 6.217,
+            "vote_count": 23
         },
         {
             "adult": false,
@@ -203,45 +203,6 @@
         },
         {
             "adult": false,
-            "backdrop_path": "/7nAVXGHHtaNcdsqvDXmY6R9N0fG.jpg",
-            "genre_ids": [
-                28,
-                35
-            ],
-            "id": 1363123,
-            "original_language": "en",
-            "original_title": "The Family Plan 2",
-            "overview": "Now that Dan's assassin days are behind him, all he wants for Christmas is quality time with his kids. But when he learns his daughter has her own plans, he books a family trip to London—putting them all in the crosshairs of an unexpected enemy.",
-            "popularity": 171.4991,
-            "poster_path": "/semFxuYx6HcrkZzslgAkBqfJvZk.jpg",
-            "release_date": "2025-11-11",
-            "title": "The Family Plan 2",
-            "video": false,
-            "vote_average": 6.7,
-            "vote_count": 285
-        },
-        {
-            "adult": false,
-            "backdrop_path": "/l8pwO23MCvqYumzozpxynCNfck1.jpg",
-            "genre_ids": [
-                14,
-                12,
-                10749
-            ],
-            "id": 967941,
-            "original_language": "en",
-            "original_title": "Wicked: For Good",
-            "overview": "As an angry mob rises against the Wicked Witch, Glinda and Elphaba will need to come together one final time. With their singular friendship now the fulcrum of their futures, they will need to truly see each other, with honesty and empathy, if they are to change themselves, and all of Oz, for good.",
-            "popularity": 179.3955,
-            "poster_path": "/si9tolnefLSUKaqQEGz1bWArOaL.jpg",
-            "release_date": "2025-11-19",
-            "title": "Wicked: For Good",
-            "video": false,
-            "vote_average": 6.768,
-            "vote_count": 360
-        },
-        {
-            "adult": false,
             "backdrop_path": "/ebyxeBh56QNXxSJgTnmz7fXAlwk.jpg",
             "genre_ids": [
                 28,
@@ -257,8 +218,8 @@
             "release_date": "2025-11-05",
             "title": "Predator: Badlands",
             "video": false,
-            "vote_average": 7.4,
-            "vote_count": 528
+            "vote_average": 7.389,
+            "vote_count": 533
         },
         {
             "adult": false,
@@ -281,42 +242,62 @@
         },
         {
             "adult": false,
-            "backdrop_path": "/cVzAhirOhKh91AB1TFcGn0Rh5c3.jpg",
+            "backdrop_path": "/l8pwO23MCvqYumzozpxynCNfck1.jpg",
             "genre_ids": [
-                28,
-                53
+                14,
+                12,
+                10749
             ],
-            "id": 1208561,
+            "id": 967941,
             "original_language": "en",
-            "original_title": "Art of Eight Limbs",
-            "overview": "Four canisters of deadly VX nerve gas have fallen into the hands of an international arms dealer in Myanmar. A CIA recruit delivers a high-tech detection device to an agent already on the ground.",
-            "popularity": 144.6175,
-            "poster_path": "/tZRypLd2SU3Eeqg5tD5cwkk5CdL.jpg",
-            "release_date": "2024-08-16",
-            "title": "Art of Eight Limbs",
+            "original_title": "Wicked: For Good",
+            "overview": "As an angry mob rises against the Wicked Witch, Glinda and Elphaba will need to come together one final time. With their singular friendship now the fulcrum of their futures, they will need to truly see each other, with honesty and empathy, if they are to change themselves, and all of Oz, for good.",
+            "popularity": 179.3955,
+            "poster_path": "/si9tolnefLSUKaqQEGz1bWArOaL.jpg",
+            "release_date": "2025-11-19",
+            "title": "Wicked: For Good",
             "video": false,
-            "vote_average": 6.484,
-            "vote_count": 32
+            "vote_average": 6.767,
+            "vote_count": 362
         },
         {
             "adult": false,
-            "backdrop_path": "/lZYMXx74pWmbj5Q5jp1QaMvmuuR.jpg",
+            "backdrop_path": "/ytCi1wg6YHpYcFRWCO2jpzN31Kf.jpg",
             "genre_ids": [
                 28,
-                14,
-                53
+                53,
+                80
             ],
-            "id": 1180831,
-            "original_language": "no",
-            "original_title": "Troll 2",
-            "overview": "When a dangerous new troll unleashes devastation across their homeland, Nora, Andreas and Major Kris embark on their most perilous mission yet.",
-            "popularity": 423.2374,
-            "poster_path": "/p6xAExLNFbHcLfvSuvLPoM8aqZU.jpg",
-            "release_date": "2025-11-30",
-            "title": "Troll 2",
+            "id": 1196573,
+            "original_language": "en",
+            "original_title": "She Rides Shotgun",
+            "overview": "Newly released from prison and marked for death by unrelenting enemies, Nate must now protect his estranged 11-year-old daughter, Polly, at all costs. With scant resources and no one to trust, Nate and Polly forge a bond under fire as he shows her how to fight and survive—and she teaches him the true meaning of unconditional love.",
+            "popularity": 178.292,
+            "poster_path": "/nvqW8mOm818QDio3GKKmPLK8kXj.jpg",
+            "release_date": "2025-07-31",
+            "title": "She Rides Shotgun",
             "video": false,
-            "vote_average": 6.792,
-            "vote_count": 72
+            "vote_average": 7.126,
+            "vote_count": 123
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/7nAVXGHHtaNcdsqvDXmY6R9N0fG.jpg",
+            "genre_ids": [
+                28,
+                35
+            ],
+            "id": 1363123,
+            "original_language": "en",
+            "original_title": "The Family Plan 2",
+            "overview": "Now that Dan's assassin days are behind him, all he wants for Christmas is quality time with his kids. But when he learns his daughter has her own plans, he books a family trip to London—putting them all in the crosshairs of an unexpected enemy.",
+            "popularity": 171.4991,
+            "poster_path": "/semFxuYx6HcrkZzslgAkBqfJvZk.jpg",
+            "release_date": "2025-11-11",
+            "title": "The Family Plan 2",
+            "video": false,
+            "vote_average": 6.676,
+            "vote_count": 287
         },
         {
             "adult": false,
@@ -354,27 +335,27 @@
             "release_date": "2025-10-17",
             "title": "Frankenstein",
             "video": false,
-            "vote_average": 7.772,
-            "vote_count": 2036
+            "vote_average": 7.77,
+            "vote_count": 2040
         },
         {
             "adult": false,
-            "backdrop_path": "/eMBYlgFTHfZaTz96eJxlkeMsKo9.jpg",
+            "backdrop_path": "/cVzAhirOhKh91AB1TFcGn0Rh5c3.jpg",
             "genre_ids": [
-                16,
-                28
+                28,
+                53
             ],
-            "id": 1539104,
-            "original_language": "ja",
-            "original_title": "劇場版 呪術廻戦「渋谷事変 特別編集版」×「死滅回游 先行上映」",
-            "overview": "A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds, trapping countless civilians inside. Satoru Gojo, the strongest jujutsu sorcerer, steps into the chaos. But lying in wait are curse users and spirits scheming to seal him away. Yuji Itadori, accompanied by his classmates and other top-tier jujutsu sorcerers, enters the fray in an unprecedented clash of curses — the Shibuya Incident. In the aftermath, ten colonies across Japan are transformed into dens of curses in a plan orchestrated by Noritoshi Kamo. As the deadly Culling Game starts, Special Grade sorcerer Yuta Okkotsu is assigned to carry out Yuji's execution for his perceived crimes. A compilation movie of Shibuya Incident including the first two episodes of the Culling Games arc.",
-            "popularity": 125.7399,
-            "poster_path": "/tc7RrVW5FGvyO2tsgW6LIN1esHI.jpg",
-            "release_date": "2025-11-07",
-            "title": "JUJUTSU KAISEN: Execution -Shibuya Incident x The Culling Game Begins-",
+            "id": 1208561,
+            "original_language": "en",
+            "original_title": "Art of Eight Limbs",
+            "overview": "Four canisters of deadly VX nerve gas have fallen into the hands of an international arms dealer in Myanmar. A CIA recruit delivers a high-tech detection device to an agent already on the ground.",
+            "popularity": 144.6175,
+            "poster_path": "/tZRypLd2SU3Eeqg5tD5cwkk5CdL.jpg",
+            "release_date": "2024-08-16",
+            "title": "Art of Eight Limbs",
             "video": false,
-            "vote_average": 4.8,
-            "vote_count": 40
+            "vote_average": 6.484,
+            "vote_count": 32
         },
         {
             "adult": false,
@@ -395,9 +376,28 @@
             "title": "Zootopia",
             "video": false,
             "vote_average": 7.755,
-            "vote_count": 17175
+            "vote_count": 17178
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/eMBYlgFTHfZaTz96eJxlkeMsKo9.jpg",
+            "genre_ids": [
+                16,
+                28
+            ],
+            "id": 1539104,
+            "original_language": "ja",
+            "original_title": "劇場版 呪術廻戦「渋谷事変 特別編集版」×「死滅回游 先行上映」",
+            "overview": "A veil abruptly descends over the busy Shibuya area amid the bustling Halloween crowds, trapping countless civilians inside. Satoru Gojo, the strongest jujutsu sorcerer, steps into the chaos. But lying in wait are curse users and spirits scheming to seal him away. Yuji Itadori, accompanied by his classmates and other top-tier jujutsu sorcerers, enters the fray in an unprecedented clash of curses — the Shibuya Incident. In the aftermath, ten colonies across Japan are transformed into dens of curses in a plan orchestrated by Noritoshi Kamo. As the deadly Culling Game starts, Special Grade sorcerer Yuta Okkotsu is assigned to carry out Yuji's execution for his perceived crimes. A compilation movie of Shibuya Incident including the first two episodes of the Culling Games arc.",
+            "popularity": 125.7399,
+            "poster_path": "/tc7RrVW5FGvyO2tsgW6LIN1esHI.jpg",
+            "release_date": "2025-11-07",
+            "title": "JUJUTSU KAISEN: Execution -Shibuya Incident x The Culling Game Begins-",
+            "video": false,
+            "vote_average": 5.136,
+            "vote_count": 44
         }
     ],
-    "total_pages": 54001,
-    "total_results": 1080019
+    "total_pages": 54006,
+    "total_results": 1080110
 }

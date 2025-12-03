@@ -33,27 +33,38 @@ def transform_tmdb_to_files():
     with open("backend/data/tmdb_data.json", "r", encoding="utf-8") as f:
         tmdb_data = json.load(f)
 
-    # Load existing mapping if it exists
-    mapping_file = "movies_transformed/tmdb_uuid_map.json"
+    print(f"Found {len(tmdb_data.get('results', []))} movies in TMDb data.")
+
+    # Output folder
+    output_dir = "backend/data/movies"
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"Using output folder: {os.path.abspath(output_dir)}")
+
+    # Mapping file path
+    mapping_file = os.path.join(output_dir, "tmdb_uuid_map.json")
     if os.path.exists(mapping_file):
         with open(mapping_file, "r", encoding="utf-8") as f:
             tmdb_uuid_map = json.load(f)
+        print("Loaded existing UUID map.")
     else:
         tmdb_uuid_map = {}
-
-    # Create output folder if it doesn't exist
-    output_dir = "movies_transformed"
-    os.makedirs(output_dir, exist_ok=True)
+        print("No existing UUID map found; starting fresh.")
 
     for movie in tmdb_data.get("results", []):
         tmdb_id = str(movie.get("id"))
 
-        # Reuse UUID if already mapped, otherwise generate new
+        # Reuse UUID if already mapped
         if tmdb_id in tmdb_uuid_map:
             movie_id = tmdb_uuid_map[tmdb_id]
         else:
             movie_id = str(uuid.uuid4())
             tmdb_uuid_map[tmdb_id] = movie_id
+
+        filename = os.path.join(output_dir, f"{movie_id}.json")
+
+        # Skip creating file if it already exists
+        if os.path.exists(filename):
+            continue
 
         transformed = {
             "movie_id": movie_id,
@@ -72,17 +83,14 @@ def transform_tmdb_to_files():
             "source_folder": movie.get("title")
         }
 
-        # Save individual movie JSON
-        filename = os.path.join(output_dir, f"{movie_id}.json")
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(transformed, f, indent=4, ensure_ascii=False)
+        print(f"Created file: {filename}")
 
-    # Save mapping for next runs
+    # Save mapping file after processing all movies
     with open(mapping_file, "w", encoding="utf-8") as f:
         json.dump(tmdb_uuid_map, f, indent=4)
-
-    print(f"Saved {len(tmdb_data.get('results', []))} movies to '{output_dir}' folder.")
-
+    print(f"Processed {len(tmdb_data.get('results', []))} movies.")
 
 transform_tmdb_to_files()
 
