@@ -15,6 +15,8 @@ class UserPublic(UserBase):
     movies_reviewed: list[str] = []
     watch_later: list[str] = []
     penalties: list[str] = []
+    friends: list[str] = []### I add this
+    friend_requests: list[str] = [] ### and this 
 
 
 class UserSelfUpdate(BaseModel):
