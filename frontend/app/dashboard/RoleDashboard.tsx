@@ -110,6 +110,21 @@ export function RoleDashboard({ role }: RoleDashboardProps) {
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+    if (role === "guest") {
+      // Guest dashboard needs no login
+      setUser({
+        username: "Guest",
+        email: "N/A",
+        role: "guest",
+        status: "active",
+      });
+      setActions([]);
+      setLinks([]);
+      setRoleSections(ROLE_SECTIONS["guest"]);
+      setStatus("ready");
+      return;
+    }
     if (!token) {
       router.replace("/login");
       return;
@@ -223,7 +238,7 @@ export function RoleDashboard({ role }: RoleDashboardProps) {
         <div className={styles.layout}>
           <aside className={styles.sidebar}>
             <p className={styles.sectionLabel}>Available actions</p>
-            {actions.length ? (
+            {actions.length ? ( 
               <div className={styles.chipRow}>
                 {actions.map((item) => (
                   <span className={styles.chip} key={item}>
@@ -266,6 +281,24 @@ export function RoleDashboard({ role }: RoleDashboardProps) {
               <p className={styles.sectionLabel}>Role summary</p>
               <p className={styles.lede}>{ROLE_DESCRIPTIONS[role]}</p>
             </div>
+
+            <div className={styles.card}>
+              <p className={styles.sectionLabel}>Random movies generator</p>
+              <p className={styles.lede}>
+                In case you have no idea what to watch. Click the button below
+              </p>
+
+              <div className={styles.buttonRow}>
+                <button
+                  className={styles.primary}
+                  onClick={() => router.push("/movies/random")}
+                >
+                  Generator
+                </button>
+              </div>
+            </div>
+
+            
 
             {roleSections.map((section) => (
               <div className={styles.card} key={section.title}>

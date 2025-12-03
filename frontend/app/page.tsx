@@ -18,6 +18,9 @@ export default function Home() {
             <a className={styles.secondary} href="/register">
               Create account
             </a>
+            <a className={styles.third} href="/dashboard/guest">
+              Browse as a guest
+            </a>
           </div>
         </div>
         <div className={styles.callouts}>

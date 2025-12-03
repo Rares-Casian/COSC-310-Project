@@ -131,6 +131,10 @@ export default function LoginPage() {
           <span>Need an account?</span>
           <a href="/register">Create one</a>
         </div>
+        <div className={styles.footer}>
+          <span>Don't wanna login/register?</span>
+          <a href="/dashboard/guest">Browse as a guest</a>
+        </div>
       </main>
     </div>
   );
