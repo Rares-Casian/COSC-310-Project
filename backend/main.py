@@ -18,8 +18,14 @@ from backend.core import exceptions
 logger = logging.getLogger(__name__)
 
 
+tags_metadata = [
+    {
+        "name": "Dashboard",
+        "description": "Role-specific dashboards for authenticated users.",
+    },
+]
 
-app = FastAPI()
+app = FastAPI(openapi_tags=tags_metadata)
 
 # Include routers
 app.include_router(authentication_router.router)

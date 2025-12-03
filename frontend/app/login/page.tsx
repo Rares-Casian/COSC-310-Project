@@ -18,7 +18,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
     if (token) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [router]);
 
@@ -63,7 +63,7 @@ export default function LoginPage() {
       setMessage("Logged in successfully. Redirecting...");
       setPassword("");
 
-      router.replace("/");
+      router.replace("/dashboard");
     } catch (error) {
       setStatus("error");
       setMessage("Network error. Please try again.");

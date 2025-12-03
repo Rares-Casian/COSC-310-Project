@@ -1,5 +1,6 @@
 """Authorization helpers for role and penalty checks."""
 from functools import wraps
+import inspect
 from fastapi import Depends
 from backend.authentication.security import get_current_user
 from backend.penalties import utils as penalty_utils
@@ -33,7 +34,8 @@ def block_if_penalized(blocked_types: list[str]):
         async def wrapper(*args, current_user=Depends(get_current_user), **kwargs):
             # Skip penalty checks for guest users
             if current_user.user_id == "guest" or current_user.role == "guest":
-                return await func(*args, current_user=current_user, **kwargs)
+                result = func(*args, current_user=current_user, **kwargs)
+                return await result if inspect.isawaitable(result) else result
             
             # Get user's active penalties (resolves expiries)
             penalties = penalty_utils.get_penalties_for_user(current_user.user_id)
@@ -47,6 +49,7 @@ def block_if_penalized(blocked_types: list[str]):
                 if p.type.value in blocked_types:
                     raise exceptions.AuthorizationError(f"Action blocked due to active {p.type.value} penalty.")
 
-            return await func(*args, current_user=current_user, **kwargs)
+            result = func(*args, current_user=current_user, **kwargs)
+            return await result if inspect.isawaitable(result) else result
         return wrapper
     return decorator

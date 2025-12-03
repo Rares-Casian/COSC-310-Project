@@ -6,8 +6,13 @@
         "hashed_password": "$2b$12$N9JS6NcWAoc0Beunm6p24OBOyKEMnwWtdbNMZBdKovs4vJZ84LnKm",
         "role": "member",
         "status": "active",
-        "movies_reviewed": [],
-        "watch_later": [],
+        "movies_reviewed": [
+            "c6f4b075-406a-430e-b47c-6a57f0695439"
+        ],
+        "watch_later": [
+            "c6f4b075-406a-430e-b47c-6a57f0695439",
+            "1f28fb12-fad4-43bc-88d8-848ff3548631"
+        ],
         "penalties": []
     },
     {
@@ -15,7 +20,7 @@
         "username": "admin",
         "email": "admin@example.com",
         "hashed_password": "$2b$12$r1xFlGz5bKaGYBdgy.R9auikR215MSkY96YR9c.Q0PlfqJmeq1KaK",
-        "role": "member",
+        "role": "administrator",
         "status": "active",
         "movies_reviewed": [],
         "watch_later": [],
