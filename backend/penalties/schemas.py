@@ -156,14 +156,13 @@ def calculate_expiry(
     if p_type == "warning":
         return None
 
-    match severity:
-        case "minor":
-            return (now + timedelta(days=3)).isoformat()
-        case "moderate":
-            return (now + timedelta(days=7)).isoformat()
-        case "severe":
-            if p_type == "suspension":
-                return (now + timedelta(days=30)).isoformat()
-            return (now + timedelta(days=14)).isoformat()
-        case _:
-            return (now + timedelta(days=7)).isoformat()
+    if severity == "minor":
+        return (now + timedelta(days=3)).isoformat()
+    if severity == "moderate":
+        return (now + timedelta(days=7)).isoformat()
+    if severity == "severe":
+        if p_type == "suspension":
+            return (now + timedelta(days=30)).isoformat()
+        return (now + timedelta(days=14)).isoformat()
+
+    return (now + timedelta(days=7)).isoformat()

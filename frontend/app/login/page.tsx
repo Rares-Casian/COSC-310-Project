@@ -16,10 +16,9 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // If already logged in, skip back to dashboard
     const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
     if (token) {
-      router.replace("/dashboard");
+      router.replace("/");
     }
   }, [router]);
 
@@ -64,7 +63,7 @@ export default function LoginPage() {
       setMessage("Logged in successfully. Redirecting...");
       setPassword("");
 
-      router.push("/dashboard");
+      router.replace("/");
     } catch (error) {
       setStatus("error");
       setMessage("Network error. Please try again.");

@@ -9,5 +9,16 @@
         "movies_reviewed": [],
         "watch_later": [],
         "penalties": []
+    },
+    {
+        "user_id": "899c3860-fe3a-4832-be66-1d884f4417de",
+        "username": "admin",
+        "email": "admin@example.com",
+        "hashed_password": "$2b$12$r1xFlGz5bKaGYBdgy.R9auikR215MSkY96YR9c.Q0PlfqJmeq1KaK",
+        "role": "member",
+        "status": "active",
+        "movies_reviewed": [],
+        "watch_later": [],
+        "penalties": []
     }
 ]

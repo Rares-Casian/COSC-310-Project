@@ -12,6 +12,7 @@ from backend.reviews import router as reviews_router
 from backend.reports import router as reports_router
 from backend.penalties import router as penalties_router
 from backend.users import router as users_router
+from backend.dashboards import router as dashboard_router
 from backend.core import exceptions
 
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ app.include_router(reviews_router.router)
 app.include_router(reports_router.router)
 app.include_router(penalties_router.router)
 app.include_router(users_router.router)
+app.include_router(dashboard_router.router)
 
 
 # Exception handlers
