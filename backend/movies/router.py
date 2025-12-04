@@ -104,11 +104,26 @@ async def modify_watch_later(update: schemas.WatchLaterUpdate, current_user: Use
     return {"message": f"Movie {update.action}ed successfully."}
 
 
+@router.get("/{movie_id}/book-time")
+def get_movie_book_time(movie_id: str, current_user: UserToken = Depends(get_current_user)):
+    """Estimate reading time if the movie were adapted as a book."""
+    movie = utils.get_movie(movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found.")
+
+    duration = movie.get("duration")
+    if duration is None:
+        raise HTTPException(status_code=400, detail="Movie runtime is unavailable.")
+
+    hours = (duration * 300) / 250 / 60
+    message = f"If this movie were a book, it would take {hours:.2f} hours to read"
+    return {"message": message}
+
+
 @router.get("/{movie_id}", response_model=schemas.Movie)
 def get_movie(movie_id: str, current_user: UserToken = Depends(get_current_user)):
     movie = utils.get_movie(movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found.")
     return movie
-
 
