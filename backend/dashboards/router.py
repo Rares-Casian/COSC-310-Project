@@ -51,6 +51,16 @@ def _normalize_role(role: str) -> str:
 
 def _dashboard_payload(current_user: UserToken, role: str) -> Dict:
     user = user_utils.get_user_by_id(current_user.user_id) or {}
+
+    # Friendship links for all logged-in roles
+    friendship_links = []
+    if role in ("member", "critic", "moderator", "administrator"):
+        friendship_links = [
+            {"label": "Friends", "href": "/friendship/list"},
+            {"label": "Pending Requests", "href": "/friendship/requests"},
+            {"label": "Add Friend", "href": "/friendship/add"},
+        ]
+
     return {
         "user": {
             "user_id": user.get("user_id", current_user.user_id),
@@ -60,12 +70,16 @@ def _dashboard_payload(current_user: UserToken, role: str) -> Dict:
             "status": current_user.status,
         },
         "actions": ROLE_ACTIONS.get(role, []),
+
+        # MERGED quick links
         "links": [
             {"label": "Home", "href": "/"},
             {"label": "Watchlist", "href": "/movies/watch-later"},
             {"label": "Reviews", "href": "/reviews"},
+            *friendship_links,  # <--- ADDED
         ],
     }
+
 
 
 def _enforce_role(current_user: UserToken, required_role: str):
