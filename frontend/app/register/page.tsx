@@ -26,15 +26,31 @@ export default function RegisterPage() {
         body: JSON.stringify({ username, email, password }),
       });
 
-      const data = await response.json().catch(() => null);
+      const bodyText = await response.text();
+      let data: any = null;
+      try {
+        data = bodyText ? JSON.parse(bodyText) : null;
+      } catch {
+        /* Body was not JSON; fallback to plain text below */
+      }
 
       if (!response.ok) {
+        const validationDetails = Array.isArray(data?.error?.details)
+          ? data.error.details.join(" ")
+          : undefined;
         const detail =
           data?.error?.message ||
+          validationDetails ||
           data?.detail ||
-          "Could not register right now. Please check your details and try again.";
+          bodyText?.trim() ||
+          `Request failed with status ${response.status}`;
         setStatus("error");
         setMessage(detail);
+        console.error("Registration failed", {
+          status: response.status,
+          body: bodyText,
+          parsed: data,
+        });
         return;
       }
 
@@ -58,6 +74,14 @@ export default function RegisterPage() {
           Connect to the backend and start tracking your watch list. Use the same credentials when
           you sign in later.
         </p>
+        <div className={styles.hintsBox}>
+          <p className={styles.hintTitle}>Registration tips</p>
+          <ul className={styles.hints}>
+            <li>Username: 3-20 characters, letters and numbers only.</li>
+            <li>Password: 8+ characters with upper, lower, number, and symbol.</li>
+            <li>Email must be valid and not already registered.</li>
+          </ul>
+        </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <label className={styles.label} htmlFor="username">
