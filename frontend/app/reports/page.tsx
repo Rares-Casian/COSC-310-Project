@@ -23,6 +23,7 @@ export default function ReportsPage() {
   const [message, setMessage] = useState("");
   const [updateStatus, setUpdateStatus] = useState("pending");
   const [notes, setNotes] = useState("");
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -50,9 +51,24 @@ export default function ReportsPage() {
     }
   };
 
+  const loadUserRole = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${apiBase}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => null);
+      if (response.ok && data?.role) {
+        setUserRole(data.role);
+      }
+    } catch (error) {
+      // Silently fail
+    }
+  };
+
   useEffect(() => {
     loadReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadUserRole();
   }, []);
 
   const patchReport = async (reportId: string) => {
@@ -105,6 +121,15 @@ export default function ReportsPage() {
             <p className={styles.meta}>Moderators and administrators can manage reports.</p>
           </div>
           <div className={styles.headerActions}>
+            {userRole === "administrator" && (
+              <button
+                className={styles.primary}
+                type="button"
+                onClick={() => (window.location.href = "/reports/new")}
+              >
+                Create Report
+              </button>
+            )}
             <button
               className={styles.secondary}
               type="button"
@@ -158,9 +183,11 @@ export default function ReportsPage() {
                   <button className={styles.primary} type="button" onClick={() => patchReport(report.report_id)}>
                     Update
                   </button>
-                  <button className={styles.secondary} type="button" onClick={() => deleteReport(report.report_id)}>
-                    Delete
-                  </button>
+                  {userRole === "administrator" && (
+                    <button className={styles.secondary} type="button" onClick={() => deleteReport(report.report_id)}>
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             ))
