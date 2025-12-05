@@ -374,6 +374,10 @@ def hybrid_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMov
         except:
             # Fallback
             movie_data = movie_obj if isinstance(movie_obj, dict) else movie_obj.dict()
+
+        # Avoid passing duplicate recommendation fields when rebuilding the combined object
+        movie_data.pop("recommendation_reason", None)
+        movie_data.pop("recommendation_score", None)
         
         rec_movie = RecommendedMovie(
             **movie_data,
@@ -383,4 +387,3 @@ def hybrid_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMov
         recommendations.append(rec_movie)
     
     return recommendations
-
