@@ -56,24 +56,28 @@ const ROLE_SECTIONS: Record<RoleDashboardProps["role"], DashboardSection[]> = {
     { title: "Reviews", description: "Read community and critic reviews.", href: "/reviews", cta: "Read reviews" },
   ],
   member: [
+    { title: "Recommendations", description: "Get personalized movie recommendations.", href: "/recommendations", cta: "View recommendations" },
     { title: "Movies", description: "Browse the catalog and search titles.", href: "/movies", cta: "Browse movies" },
     { title: "Watchlist", description: "View and edit your watch-later list.", href: "/movies/watch-later", cta: "Manage watchlist" },
     { title: "Reviews", description: "Write and edit your own reviews.", href: "/reviews", cta: "Open reviews" },
     { title: "Reports", description: "Submit reports on problematic content.", href: "/reports/new", cta: "File a report" },
   ],
   critic: [
+    { title: "Recommendations", description: "Get personalized movie recommendations.", href: "/recommendations", cta: "View recommendations" },
     { title: "Movies", description: "Browse the catalog and search titles.", href: "/movies", cta: "Browse movies" },
     { title: "Watchlist", description: "Keep your watch-later list updated.", href: "/movies/watch-later", cta: "Manage watchlist" },
     { title: "Reviews", description: "Publish critic-grade reviews and edits.", href: "/reviews", cta: "Open reviews" },
     { title: "Reports", description: "Submit reports on problematic content.", href: "/reports/new", cta: "File a report" },
   ],
   moderator: [
+    { title: "Recommendations", description: "Get personalized movie recommendations.", href: "/recommendations", cta: "View recommendations" },
     { title: "Movies", description: "Browse the catalog and search titles.", href: "/movies", cta: "Browse movies" },
     { title: "Reports queue", description: "Review, update, or close reports.", href: "/reports", cta: "View reports" },
     { title: "Penalties", description: "Issue and resolve penalties.", href: "/penalties", cta: "Manage penalties" },
     { title: "Watchlist", description: "Assist users with their watch-later lists.", href: "/movies/watch-later", cta: "View watchlists" },
   ],
   administrator: [
+    { title: "Recommendations", description: "Get personalized movie recommendations.", href: "/recommendations", cta: "View recommendations" },
     { title: "Movies", description: "Browse the catalog and search titles.", href: "/movies", cta: "Browse movies" },
     { title: "Users", description: "Manage accounts, roles, and status.", href: "/users", cta: "Manage users" },
     { title: "Reports", description: "Oversee report resolutions.", href: "/reports", cta: "Review reports" },
