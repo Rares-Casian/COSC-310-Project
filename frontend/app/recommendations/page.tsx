@@ -27,7 +27,8 @@ type RecommendationsResponse = {
   recommendations?: RecommendedMovie[];
   recommendation_type?: string;
   total_count?: number;
-
+  error?: ApiError;
+};
 
 type Status = "loading" | "ready" | "error";
 
