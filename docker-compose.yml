@@ -1,40 +1,21 @@
-version: "3.9"
-
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cosc-310-project-backend:latest
     container_name: cosc-backend
     ports:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - ./backend/data:/app/backend/data
     networks:
       - cosc
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        # Public URLs must be reachable from the browser (host), not the Docker network name
-        NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
-        NEXT_PUBLIC_API_URL: http://localhost:8000
+    image: cosc-310-project-frontend:latest
     container_name: cosc-frontend
     ports:
       - "3000:3000"
     env_file:
       - .env
-    environment:
-      - NODE_ENV=production
-      # These are read by the browser bundle, so keep them host-accessible
-      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
     networks:
