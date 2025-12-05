@@ -40,7 +40,7 @@ def get_recommendations(
         recommendations = utils.friend_based_recommendations(current_user.user_id, limit)
     elif rec_type == "popular":
         recommendations = utils.popular_recommendations(current_user.user_id, limit)
-    else:  # Default to hybrid
+    else:
         recommendations = utils.hybrid_recommendations(current_user.user_id, limit)
         rec_type = "hybrid"
     
