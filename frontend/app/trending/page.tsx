@@ -131,14 +131,6 @@ const fetchMovies = async () => {
                 <div style={{ padding: "0.5rem" }}>
                   <h3 style={{ margin: "0.5rem 0", fontSize: "1rem" }}>{movie.title}</h3>
                   <p style={{ margin: 0, fontWeight: "bold" }}>Rating: {movie.vote_average}</p>
-                  <button
-                    className={styles.primary}
-                    type="button"
-                    onClick={() => updateWatchLater(movie.id.toString())}
-                    style={{padding: "12px 14px", margin: "0.4rem"}}
-                  >
-                    Add to watchlist
-                  </button>
                 </div>
               </div>
             ))}

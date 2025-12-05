@@ -92,7 +92,16 @@ def transform_tmdb_to_files():
         json.dump(tmdb_uuid_map, f, indent=4)
     print(f"Processed {len(tmdb_data.get('results', []))} movies.")
 
-transform_tmdb_to_files()
+#transform_tmdb_to_files()
+
+
+
+
+
+
+
+
+
 
 
 
