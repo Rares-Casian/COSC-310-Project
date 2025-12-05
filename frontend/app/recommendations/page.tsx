@@ -18,11 +18,18 @@ type RecommendedMovie = {
 };
 
 type RecommendationsResponse = {
-  user_id: string;
-  recommendations: RecommendedMovie[];
-  recommendation_type: string;
-  total_count: number;
+  user_id?: string;
+  recommendations?: RecommendedMovie[];
+  recommendation_type?: string;
+  total_count?: number;
+
+  // Add optional error shape
+  error?: {
+    message?: string;
+    detail?: string;
+  };
 };
+
 
 type Status = "loading" | "ready" | "error";
 
@@ -53,13 +60,14 @@ export default function RecommendationsPage() {
       const response = await fetch(`${apiBase}/recommendations/?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data: RecommendationsResponse = await response.json().catch(() => null);
+      const data = (await response.json().catch(() => null)) as RecommendationsResponse | null;
       if (!response.ok) {
         throw new Error(data?.error?.message || data?.error?.detail || "Could not load recommendations.");
       }
-      setRecommendations(data.recommendations || []);
+      const movies = data?.recommendations ?? [];
+      setRecommendations(movies);
       setStatus("ready");
-      if (data.recommendations.length === 0) {
+      if (movies.length === 0) {
         setMessage("No recommendations available. Try reviewing more movies or adding friends!");
       }
     } catch (error: any) {
@@ -263,4 +271,3 @@ export default function RecommendationsPage() {
     </div>
   );
 }
-
