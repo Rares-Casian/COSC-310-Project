@@ -38,14 +38,15 @@ def get_user_preferences(user_id: str) -> Dict[str, float]:
     all_movies = [movie_utils.get_movie(mid) for mid in all_movie_ids]
     all_movies = [m for m in all_movies if m]
     
+    # Weight preferences by ratings (higher rated = more preference)
     genre_scores = defaultdict(float)
     director_scores = defaultdict(float)
     star_scores = defaultdict(float)
     
     for movie in all_movies:
         movie_id = movie.get("movie_id")
-        rating = ratings.get(movie_id, 5) 
-        weight = rating / 10.0
+        rating = ratings.get(movie_id, 5)  # Default to 5 if not rated
+        weight = rating / 10.0  # Normalize to 0-1
         
         for genre in movie.get("genres", []):
             genre_scores[genre.lower()] += weight
@@ -79,8 +80,7 @@ def content_based_recommendations(user_id: str, limit: int = 20) -> List[Recomme
         score = 0.0
         reasons = []
         
-        # Matching
-        
+        # Genre matching
         movie_genres = [g.lower() for g in movie.get("genres", [])]
         genre_matches = sum(preferences["genres"].get(g, 0) for g in movie_genres)
         if genre_matches > 0:
@@ -88,19 +88,21 @@ def content_based_recommendations(user_id: str, limit: int = 20) -> List[Recomme
             top_genre = max(movie_genres, key=lambda g: preferences["genres"].get(g, 0))
             reasons.append(f"Similar genre: {top_genre.title()}")
         
+        # Director matching
         movie_directors = [d.lower() for d in movie.get("directors", [])]
         director_matches = sum(preferences["directors"].get(d, 0) for d in movie_directors)
         if director_matches > 0:
             score += director_matches * 0.3
             reasons.append(f"Director you like")
         
+        # Star matching
         movie_stars = [s.lower() for s in movie.get("main_stars", [])]
         star_matches = sum(preferences["stars"].get(s, 0) for s in movie_stars)
         if star_matches > 0:
             score += star_matches * 0.2
             reasons.append(f"Star you like")
         
-        # Boost high rated movies
+        # Boost for high ratings
         imdb_rating = movie.get("imdb_rating", 0) or 0
         if imdb_rating >= 7.5:
             score += 0.1
@@ -134,7 +136,7 @@ def collaborative_recommendations(user_id: str, limit: int = 20) -> List[Recomme
     watchlist = set(get_user_watchlist(user_id))
     excluded = reviewed_movies | watchlist
     
-    # Get all users and ratings
+    # Get all users and their ratings
     all_users = user_utils.load_active_users()
     user_similarities = []
     
@@ -147,11 +149,12 @@ def collaborative_recommendations(user_id: str, limit: int = 20) -> List[Recomme
         if not other_ratings:
             continue
         
-        # Calculate similarity
+        # Calculate similarity (cosine similarity on common movies)
         common_movies = set(user_ratings.keys()) & set(other_ratings.keys())
         if len(common_movies) < 2:
             continue
         
+        # Simple cosine similarity
         dot_product = sum(user_ratings[m] * other_ratings[m] for m in common_movies)
         user_norm = sum(r * r for r in user_ratings.values()) ** 0.5
         other_norm = sum(r * r for r in other_ratings.values()) ** 0.5
@@ -166,15 +169,16 @@ def collaborative_recommendations(user_id: str, limit: int = 20) -> List[Recomme
     # Sort by similarity
     user_similarities.sort(key=lambda x: x[1], reverse=True)
     
+    # Get movies liked by similar users
     movie_scores = defaultdict(float)
     movie_reasons = defaultdict(list)
     
-    for other_id, similarity in user_similarities[:10]:  # Top 10 most similar users
+    for other_id, similarity in user_similarities[:10]:  # Top 10 similar users
         other_ratings = get_user_ratings(other_id)
         for movie_id, rating in other_ratings.items():
             if movie_id in excluded:
                 continue
-            if rating >= 7: 
+            if rating >= 7:  # Only consider movies they liked (7+)
                 movie_scores[movie_id] += similarity * rating
                 movie_reasons[movie_id].append(f"Liked by similar users")
     
@@ -215,7 +219,7 @@ def friend_based_recommendations(user_id: str, limit: int = 20) -> List[Recommen
         for movie_id, rating in friend_ratings.items():
             if movie_id in excluded:
                 continue
-            if rating >= 7:  # Only consider movies liked by friends
+            if rating >= 7:  # Only consider movies friends liked
                 movie_scores[movie_id] += rating
                 friend = user_utils.get_user_by_id(friend_id)
                 friend_name = friend.get("username", "friend") if friend else "friend"
@@ -229,7 +233,7 @@ def friend_based_recommendations(user_id: str, limit: int = 20) -> List[Recommen
     for score, movie_id in scored_items[:limit]:
         movie = movie_utils.get_movie(movie_id)
         if movie:
-            friend_names = list(set(movie_reasons[movie_id]))[:3]
+            friend_names = list(set(movie_reasons[movie_id]))[:3]  # Limit to 3 friends
             if len(friend_names) == 1:
                 reason = f"Liked by {friend_names[0]}"
             elif len(friend_names) == 2:
@@ -279,7 +283,7 @@ def popular_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMo
             score += 0.3
             reasons.append("Critic favorite")
         
-        # High amount of reviews
+        # Many reviews
         total_reviews = movie.get("total_user_reviews", 0) or 0
         if total_reviews > 100:
             score += 0.2
@@ -307,7 +311,7 @@ def hybrid_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMov
     """Combine multiple recommendation strategies."""
     all_recommendations = {}
     
-    # Get recommendations from different sources for hybrid
+    # Get recommendations from different sources
     content_recs = content_based_recommendations(user_id, limit * 2)
     collab_recs = collaborative_recommendations(user_id, limit * 2)
     friend_recs = friend_based_recommendations(user_id, limit * 2)
@@ -319,7 +323,7 @@ def hybrid_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMov
         if movie_id not in all_recommendations:
             all_recommendations[movie_id] = {
                 "movie": rec,
-                "score": rec.recommendation_score * 0.4, 
+                "score": rec.recommendation_score * 0.4,  # Content-based weight
                 "reasons": [rec.recommendation_reason]
             }
         else:
@@ -368,11 +372,13 @@ def hybrid_recommendations(user_id: str, limit: int = 20) -> List[RecommendedMov
     recommendations = []
     for item in sorted_recs[:limit]:
         reason = ", ".join(set(item["reasons"][:2]))  # Combine top 2 reasons
+        # Get the movie data from the RecommendedMovie object
         movie_obj = item["movie"]
+        # Use model_dump() for Pydantic v2 or dict() for v1
         try:
             movie_data = movie_obj.model_dump() if hasattr(movie_obj, "model_dump") else movie_obj.dict()
         except:
-            # Fallback
+            # Fallback: if it's already a dict, use it directly
             movie_data = movie_obj if isinstance(movie_obj, dict) else movie_obj.dict()
         
         rec_movie = RecommendedMovie(
