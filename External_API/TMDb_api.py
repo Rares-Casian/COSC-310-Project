@@ -1,10 +1,10 @@
 import requests
 import os
 import json
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import uuid
 
-load_dotenv()
+load_dotenv(find_dotenv())
 API_TOKEN = os.getenv("TMDB_API_TOKEN")
 
 
@@ -127,4 +127,3 @@ the token is located in the note/resources channel in the discord
 DO NOT HARD CODE THE API KEY use "API_TOKEN = os.getenv("TMDB_API_TOKEN")"
 the .env file is in the .gitignore so it will not be pushed to the github
 """
-

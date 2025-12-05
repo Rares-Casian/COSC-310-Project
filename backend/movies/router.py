@@ -8,11 +8,11 @@ from backend.authentication.schemas import UserToken
 from backend.movies import utils, schemas
 from backend.core.authz import require_role, block_if_penalized
 from backend.core.jsonio import save_json
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
-load_dotenv()
+load_dotenv(find_dotenv())
 API_TOKEN = os.getenv("TMDB_API_TOKEN")
 TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/popular"
 
@@ -126,4 +126,3 @@ def get_movie(movie_id: str, current_user: UserToken = Depends(get_current_user)
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found.")
     return movie
-
