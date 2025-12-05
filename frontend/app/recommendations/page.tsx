@@ -17,18 +17,16 @@ type RecommendedMovie = {
   recommendation_score?: number;
 };
 
+type ApiError = {
+  message?: string;
+  detail?: string;
+};
+
 type RecommendationsResponse = {
   user_id?: string;
   recommendations?: RecommendedMovie[];
   recommendation_type?: string;
   total_count?: number;
-
-  // Add optional error shape
-  error?: {
-    message?: string;
-    detail?: string;
-  };
-};
 
 
 type Status = "loading" | "ready" | "error";
