@@ -8,11 +8,11 @@ from backend.authentication.schemas import UserToken
 from backend.movies import utils, schemas
 from backend.core.authz import require_role, block_if_penalized
 from backend.core.jsonio import save_json
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 router = APIRouter(prefix="/movies", tags=["Movies"])
 
-load_dotenv()
+load_dotenv(find_dotenv())
 API_TOKEN = os.getenv("TMDB_API_TOKEN")
 TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/popular"
 
@@ -104,11 +104,25 @@ async def modify_watch_later(update: schemas.WatchLaterUpdate, current_user: Use
     return {"message": f"Movie {update.action}ed successfully."}
 
 
+@router.get("/{movie_id}/book-time")
+def get_movie_book_time(movie_id: str, current_user: UserToken = Depends(get_current_user)):
+    """Estimate reading time if the movie were adapted as a book."""
+    movie = utils.get_movie(movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found.")
+
+    duration = movie.get("duration")
+    if duration is None:
+        raise HTTPException(status_code=400, detail="Movie runtime is unavailable.")
+
+    hours = (duration * 300) / 250 / 60
+    message = f"If this movie were a book, it would take {hours:.2f} hours to read"
+    return {"message": message}
+
+
 @router.get("/{movie_id}", response_model=schemas.Movie)
 def get_movie(movie_id: str, current_user: UserToken = Depends(get_current_user)):
     movie = utils.get_movie(movie_id)
     if not movie:
         raise HTTPException(status_code=404, detail="Movie not found.")
     return movie
-
-

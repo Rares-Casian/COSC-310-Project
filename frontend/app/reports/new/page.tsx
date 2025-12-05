@@ -15,7 +15,7 @@ export default function NewReportPage() {
 
   const submit = async () => {
     if (!token) {
-      setMessage("Login as member/critic to file a report.");
+      setMessage("Login as member/critic/administrator to file a report.");
       return;
     }
     try {
@@ -46,7 +46,7 @@ export default function NewReportPage() {
           <div>
             <p className={styles.kicker}>Reports</p>
             <h1 className={styles.title}>Submit a report</h1>
-            <p className={styles.meta}>Members and critics can file reports.</p>
+            <p className={styles.meta}>Members, critics, and administrators can file reports.</p>
           </div>
           <div className={styles.headerActions}>
             <button
