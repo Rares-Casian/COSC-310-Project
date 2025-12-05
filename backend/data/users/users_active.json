@@ -25,5 +25,16 @@
         "movies_reviewed": [],
         "watch_later": [],
         "penalties": []
+    },
+    {
+        "user_id": "32ad695d-ebf1-41be-bc58-e07e08dd12a0",
+        "username": "rares",
+        "email": "123@gmail.com",
+        "hashed_password": "$2b$12$qo64gbZ6TolAXD5tbLuZp.x6BdPD.7xiDA.A3IZwh7a6ucRy5Y/p2",
+        "role": "member",
+        "status": "active",
+        "movies_reviewed": [],
+        "watch_later": [],
+        "penalties": []
     }
 ]
